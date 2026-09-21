@@ -1,20 +1,13 @@
 FROM python:3.11-slim
 
-# Install Node.js
-RUN apt-get update && apt-get install -y curl
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
-
 # Create app directory
 WORKDIR /app
 
-# Copy requirements and package files
+# Copy requirements
 COPY requirements.txt ./
-COPY whatsapp/package*.json ./whatsapp/
 
-# Install dependencies
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-RUN cd whatsapp && npm install
 
 # Copy application source
 COPY . .
