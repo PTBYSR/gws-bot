@@ -178,6 +178,28 @@ async def send_dm_alert(member, username_clean, is_recovery=False):
     except Exception as e:
         print(f"  [!] Failed to send DM to {LOG_TARGET_USER_ID}: {e}")
 
+async def send_raw_whatsapp_message(text):
+    """Send an arbitrary raw WhatsApp message using the monitor API."""
+    if not ALERT_WHATSAPP_NUMBER:
+        return False
+    try:
+        async with aiohttp.ClientSession() as session:
+            payload = {
+                "to": ALERT_WHATSAPP_NUMBER,
+                "message": text
+            }
+            async with session.post(WHATSAPP_MONITOR_URL, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                if response.status == 200:
+                    print(f"  [✓] WhatsApp message sent to {ALERT_WHATSAPP_NUMBER}")
+                    return True
+                else:
+                    response_text = await response.text()
+                    print(f"  [!] Failed to send WhatsApp message. Status: {response.status}, Response: {response_text}")
+                    return False
+    except Exception as e:
+        print(f"  [!] Error sending WhatsApp message: {e}")
+        return False
+
 async def send_whatsapp_alert(member, username_clean, is_recovery=False):
     """Send a WhatsApp alert about a new member join using the monitor API."""
     # WhatsApp feature paused
@@ -389,6 +411,44 @@ async def on_member_join(member):
 
     # Send WhatsApp alert (paused)
     # await send_whatsapp_alert(member, username_clean, is_recovery=False)
+
+@client.event
+async def on_message(message):
+    """Option A: Live event detection test trigger."""
+    if message.author.id == client.user.id:
+        return
+    if LOG_TARGET_USER_ID and str(message.author.id) != str(LOG_TARGET_USER_ID):
+        return
+
+    content_clean = message.content.strip().lower()
+    if content_clean in ["!test", "!ping", "test", "ping"]:
+        latency_ms = round(client.latency * 1000)
+        servers_count = len(client.guilds)
+        channel_desc = "DM" if isinstance(message.channel, discord.DMChannel) else f"#{message.channel.name} in {message.guild.name}"
+        print(f"\n[🧪 TEST TRIGGER] Received '{message.content}' from {message.author} via {channel_desc}")
+        try:
+            discord_reply = (
+                f"🧪 **Live Discord Pipeline Test Verified!**\n"
+                f"• Bot: `gws-bot`\n"
+                f"• Discord Gateway: `Online & Listening` (Latency: `{latency_ms}ms`)\n"
+                f"• Monitored Servers: `{servers_count}` servers\n"
+                f"• Trigger Source: `{channel_desc}`\n"
+                f"• Status: `Active & Functional`"
+            )
+            await message.channel.send(discord_reply)
+        except Exception as e:
+            print(f"  [!] Failed to reply on Discord test command: {e}")
+        if ALERT_WHATSAPP_NUMBER:
+            wa_test_msg = (
+                f"*🧪 Live Pipeline Test Verified!*\n"
+                f"• Bot: *gws-bot*\n"
+                f"• Triggered By: *{message.author}* ({channel_desc})\n"
+                f"• Discord Gateway: *Online* (Ping: {latency_ms}ms)\n"
+                f"• Monitored Servers: *{servers_count}*\n"
+                f"• Status: *100% Live end-to-end detection active!*"
+            )
+            await send_raw_whatsapp_message(wa_test_msg)
+
 
 # â”€â”€â”€ Dummy Web Server (For Render Healthcheck) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def handle_ping(request):
