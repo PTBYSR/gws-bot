@@ -1,9 +1,14 @@
 #!/bin/bash
 # start.sh
 
-# Start the Python Selfbot Logger
-echo "Starting Python Selfbot Logger..."
-python main.py
+run_python_logger() {
+    while true; do
+        echo "[Runner] Starting Python Selfbot Logger..."
+        python -u main.py
+        EXIT_CODE=$?
+        echo "[Runner] Python Logger exited with code $EXIT_CODE. Restarting in 3 seconds..."
+        sleep 3
+    done
+}
 
-# NOTE: WhatsApp monitor is temporarily disabled.
-# To re-enable, uncomment the Node.js startup lines and restore Dockerfile Node.js steps.
+run_python_logger
