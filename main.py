@@ -1,4 +1,4 @@
-﻿import discord
+import discord
 import os
 import sys
 import asyncio
@@ -7,6 +7,8 @@ import aiohttp
 from aiohttp import web
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
+from auto_friend import dispatch_auto_friend, init_all_sender_clients
+from auto_friend_config import AUTO_FRIEND_SERVERS, ENABLE_AUTO_FRIEND_SYSTEM
 
 # Load local .env file if present
 load_dotenv()
@@ -20,7 +22,7 @@ ALERT_WHATSAPP_NUMBER = os.environ.get("ALERT_WHATSAPP_NUMBER", "")
 WHATSAPP_MONITOR_URL = os.environ.get("WHATSAPP_MONITOR_URL", "http://localhost:3005/send")
 
 # Target servers as a comma-separated string in env, e.g., "1234,5678"
-TARGET_SERVERS_STR = os.environ.get("TARGET_SERVERS_", "")
+TARGET_SERVERS_STR = os.environ.get("TARGET_SERVERS", os.environ.get("TARGET_SERVERS_", ""))
 TARGET_SERVERS = [s.strip() for s in TARGET_SERVERS_STR.split(",") if s.strip()]
 
 # Create logs directory locally (ephemeral on Render free tier)
@@ -358,6 +360,14 @@ async def on_ready():
     # if ALERT_WHATSAPP_NUMBER:
     #     status_msg += f" + WhatsApp Alerts (Number: {ALERT_WHATSAPP_NUMBER})"
     print(f"  Status  : {status_msg}")
+    if ENABLE_AUTO_FRIEND_SYSTEM:
+        active_af = [gid for gid, cfg in AUTO_FRIEND_SERVERS.items() if cfg.get("enabled")]
+        print(f"  Auto-Friend Dispatcher: ACTIVE ({len(active_af)} server(s) configured)")
+        for gid in active_af:
+            cfg = AUTO_FRIEND_SERVERS[gid]
+            print(f"   ↳ Server {gid} ➜ Sender: {cfg.get('sender_label')}")
+    else:
+        print("  Auto-Friend Dispatcher: DISABLED")
     print("=" * 60)
     for guild in client.guilds:
         print(f"  [Monitoring] {guild.name} ({guild.id}) â€” {guild.member_count} members")
@@ -373,6 +383,12 @@ async def on_ready():
     asyncio.create_task(heartbeat_loop())
 
     print("  Listening for new members...\n")
+
+@client.event
+async def on_guild_join(guild):
+    """Fires when the selfbot account joins a new server."""
+    print(f"\n[+] Joined new server: {guild.name} ({guild.id}) — {guild.member_count} members")
+    await save_servers_to_db(client.guilds, client.user)
 
 @client.event
 async def on_member_join(member):
@@ -408,6 +424,9 @@ async def on_member_join(member):
 
     # Send DM to specified user
     await send_dm_alert(member, username_clean, is_recovery=False)
+
+    # Auto-Friend Request Dispatcher (sends request from configured external account)
+    asyncio.create_task(dispatch_auto_friend(member, username_clean, client, LOG_TARGET_USER_ID))
 
     # Send WhatsApp alert (paused)
     # await send_whatsapp_alert(member, username_clean, is_recovery=False)
@@ -449,19 +468,60 @@ async def on_message(message):
             )
             await send_raw_whatsapp_message(wa_test_msg)
 
+    # Auto-Friend Test Command: !testfriend <user_id>
+    elif content_clean.startswith("!testfriend"):
+        parts = message.content.strip().split()
+        if len(parts) < 2:
+            await message.channel.send("⚠️ Usage: `!testfriend <user_id>` (e.g. `!testfriend 123456789012345678`)")
+            return
+        
+        target_uid = parts[1].strip()
+        configured_servers = [gid for gid, cfg in AUTO_FRIEND_SERVERS.items() if cfg.get("enabled")]
+        if not configured_servers:
+            await message.channel.send("⚠️ No server is currently enabled in `AUTO_FRIEND_SERVERS`.")
+            return
+
+        test_gid = configured_servers[0]
+        cfg = AUTO_FRIEND_SERVERS[test_gid]
+        sender_lbl = cfg.get("sender_label", "Sender")
+        
+        await message.channel.send(f"⏳ Testing auto-friend request to `{target_uid}` via `{sender_lbl}`...")
+        
+        from auto_friend import send_auto_friend_request
+        res = await send_auto_friend_request(
+            target_user_id=target_uid,
+            target_username="test_target",
+            guild_id=test_gid,
+            guild_name="Test Simulation"
+        )
+        
+        if res.get("success"):
+            reply = f"✅ **Auto-Friend Test Passed!**\nFriend request successfully sent from `{sender_lbl}` to `{target_uid}`."
+        elif res.get("captcha_required"):
+            reply = f"⚠️ **Captcha Challenge Required!**\nDiscord triggered hCaptcha Enterprise for `{sender_lbl}`. The token was protected and not burned."
+        elif res.get("invalid_token"):
+            reply = f"❌ **Invalid Token!**\nThe sender token for `{sender_lbl}` returned 401 Unauthorized."
+        else:
+            reply = f"❌ **Test Failed:** `{res}`"
+            
+        await message.channel.send(reply)
+
 
 # â”€â”€â”€ Dummy Web Server (For Render Healthcheck) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def handle_ping(request):
     return web.Response(text="GWS Bot Logger is running!")
 
 async def start_dummy_server():
-    app = web.Application()
-    app.router.add_get('/', handle_ping)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', PORT)
-    await site.start()
-    print(f"  [âœ“] Dummy web server running on port {PORT} (Render healthcheck)")
+    try:
+        app = web.Application()
+        app.router.add_get('/', handle_ping)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, '0.0.0.0', PORT)
+        await site.start()
+        print(f"  [✓] Dummy web server running on port {PORT} (Render healthcheck)")
+    except Exception as e:
+        print(f"  [!] Note: Dummy web server could not bind to port {PORT} ({e}). Bot will continue running.")
 
 # â”€â”€â”€ Main Runner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def main():
@@ -475,7 +535,10 @@ async def main():
     # 2. Start Dummy Web Server
     await start_dummy_server()
 
-    # 3. Start the Discord client
+    # 3. Start Auto-Friend Sender Gateway Clients (Solution B)
+    await init_all_sender_clients()
+
+    # 4. Start the main listener Discord client
     try:
         await client.start(TOKEN)
     except discord.LoginFailure:
