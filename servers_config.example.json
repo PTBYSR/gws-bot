@@ -1,8 +1,8 @@
 {
-  "1330889066425749576": {
-    "server_name": "PASE",
+  "329712211989889026": {
+    "server_name": "Cryptex Commonwealth",
     "sender_token": "YOUR_SENDER_TOKEN_1",
-    "sender_label": "georgemorcos000",
+    "sender_label": "allen.warfield.",
     "enabled": true,
     "delay_seconds": 1.5
   },

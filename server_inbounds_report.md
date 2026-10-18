@@ -41,5 +41,5 @@
 | Account | Assigned Server | Target Server ID | Status | Note |
 | :--- | :--- | :--- | :--- | :--- |
 | **`coins.ph_hdawg.`** | Coins Community | `974604371860021289` | **ACTIVE [OK]** | Token valid, member of server |
-| **`allen.warfield.`** | PASE | `1330889066425749576` | **ACTIVE [OK]** | Token refreshed & valid, member of server |
+| **`allen.warfield.`** | Cryptex Commonwealth | `329712211989889026` | **ACTIVE [OK]** | Token valid, mapped to Cryptex Commonwealth |
 | **`king_arthur0001`** | Listener Bot | *All Guilds* | **ACTIVE [OK]** | Primary listener operational |
