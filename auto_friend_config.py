@@ -58,6 +58,13 @@ AUTO_FRIEND_SERVERS = {
         "enabled": True,
         "delay_seconds": 1.5,
     },
+    "398075210949066764": {
+        "server_name": "Elite Crypto Signals",
+        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR01IeVU4LlFQWlhSelZFWmt4YWprWGRnY1RPVXJkSlhDaDNSLVd5VThJbTdv"),
+        "sender_label": "claireguerita",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
 }
 
 # Optional overrides from local servers_config.json (if present)

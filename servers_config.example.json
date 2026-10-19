@@ -19,5 +19,12 @@
     "sender_label": "nicliu___",
     "enabled": true,
     "delay_seconds": 1.5
+  },
+  "398075210949066764": {
+    "server_name": "Elite Crypto Signals",
+    "sender_token": "YOUR_SENDER_TOKEN_4",
+    "sender_label": "claireguerita",
+    "enabled": true,
+    "delay_seconds": 1.5
   }
 }
