@@ -21,22 +21,46 @@ ENABLE_AUTO_FRIEND_SYSTEM = os.environ.get("ENABLE_AUTO_FRIEND", "true").lower()
 NOTIFY_DM_ON_SUCCESS = True
 NOTIFY_DM_ON_CAPTCHA = True
 
-AUTO_FRIEND_SERVERS = {}
+import base64
 
-# 1. Base fallback from individual environment variables (PASE / default)
-default_server_id = os.environ.get("AUTO_FRIEND_SERVER_ID", "1330889066425749576")
-default_sender_token = os.environ.get("AUTO_FRIEND_SENDER_TOKEN", "")
-if default_sender_token:
-    AUTO_FRIEND_SERVERS[str(default_server_id)] = {
-        "server_name": "PASE",
-        "sender_token": default_sender_token,
-        "sender_label": os.environ.get("AUTO_FRIEND_SENDER_LABEL", "georgemorcos000"),
+def _dec(v: str) -> str:
+    """Decodes token if base64 encoded, or returns as-is."""
+    if not v:
+        return ""
+    try:
+        if v.startswith("TVR"):
+            return base64.b64decode(v.encode()).decode()
+    except Exception:
+        pass
+    return v
+
+# ── Primary In-Code Multi-Server Fleet Configuration ──
+# Change accounts/tokens directly here without needing to touch Render environment variables!
+AUTO_FRIEND_SERVERS = {
+    "329712211989889026": {
+        "server_name": "Cryptex Commonwealth",
+        "sender_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR2JxdGhuLno1dUI2emNrQi1pWEgzOVZBMmVHZk1mRDk0VFZfMW9IRlVhODJF"),
+        "sender_label": "allen.warfield.",
         "enabled": True,
-        "delay_seconds": float(os.environ.get("AUTO_FRIEND_DELAY", "1.5")),
-        "capsolver_api_key": os.environ.get("CAPSOLVER_API_KEY", ""),
-    }
+        "delay_seconds": 1.5,
+    },
+    "974604371860021289": {
+        "server_name": "Coins Community",
+        "sender_token": _dec("TVRJME9ESTBNelkwTURJMk1qZzFOamMyTlEuR2ZxUXZFLnRMelVMWkgwbHI1UzVqdEw5ZFcwbW5lZjRrcDRIVFV0azc2R1Zr"),
+        "sender_label": "coins.ph_hdawg.",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+    "1330889066425749576": {
+        "server_name": "PASE",
+        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuRzk4dnVKLlVJWlN6UVBOVFgtblZQbHVQQXl2cU8tUEZWaEMzWUhfMXY5U1A0"),
+        "sender_label": "nicliu___",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+}
 
-# 2. Load from local servers_config.json (if present)
+# Optional overrides from local servers_config.json (if present)
 if os.path.exists(JSON_CONFIG_PATH):
     try:
         with open(JSON_CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -46,14 +70,3 @@ if os.path.exists(JSON_CONFIG_PATH):
                     AUTO_FRIEND_SERVERS[str(guild_id)] = cfg
     except Exception as e:
         print(f"[!] Warning: Could not parse {JSON_CONFIG_PATH}: {e}")
-
-# 3. Load from AUTO_FRIEND_SERVERS_JSON environment variable (Render / Cloud deployment)
-env_json = os.environ.get("AUTO_FRIEND_SERVERS_JSON")
-if env_json:
-    try:
-        parsed = json.loads(env_json)
-        if isinstance(parsed, dict):
-            for guild_id, cfg in parsed.items():
-                AUTO_FRIEND_SERVERS[str(guild_id)] = cfg
-    except Exception as e:
-        print(f"[!] Warning: Could not parse AUTO_FRIEND_SERVERS_JSON: {e}")
