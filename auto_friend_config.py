@@ -39,7 +39,7 @@ def _dec(v: str) -> str:
 AUTO_FRIEND_SERVERS = {
     "329712211989889026": {
         "server_name": "Cryptex Commonwealth",
-        "sender_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR2JxdGhuLno1dUI2emNrQi1pWEgzOVZBMmVHZk1mRDk0VFZfMW9IRlVhODJF"),
+        "sender_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR1NXdmhJLlQycVJUR2dSRU14blQ4N0NvbTZEaFZGeUp4THBWQlpNeWlDXzBR"),
         "sender_label": "allen.warfield.",
         "enabled": True,
         "delay_seconds": 1.5,
