@@ -2,6 +2,7 @@
 auto_friend.py — Gateway-Connected Dispatcher Module (Solution B).
 Maintains an active Discord Gateway WebSocket session for sender account(s),
 ensuring requests carry a live session ID, TLS browser fingerprint, and heartbeats.
+Also listens for relationship updates to detect friend request acceptances.
 """
 import os
 import json
@@ -17,10 +18,55 @@ from auto_friend_config import AUTO_FRIEND_SERVERS, ENABLE_AUTO_FRIEND_SYSTEM
 SENDER_CLIENTS = {}
 SENDER_CLIENT_TASKS = []
 
+# Reference to the main listener client + log target user ID (set by main.py on startup)
+_LISTENER_CLIENT_REF = None
+_LOG_TARGET_USER_ID = None
+_NOTIFIED_ACCEPTS = set()
+
+def set_listener_ref(listener_client, log_target_user_id: str):
+    """Called from main.py to pass the listener client so sender clients can relay DM alerts."""
+    global _LISTENER_CLIENT_REF, _LOG_TARGET_USER_ID
+    _LISTENER_CLIENT_REF = listener_client
+    _LOG_TARGET_USER_ID = log_target_user_id
+
+async def notify_friend_accepted(sender_label: str, friend_user):
+    """Send a DM alert and console log when a target user accepts a friend request."""
+    if not friend_user:
+        return
+
+    friend_id = str(friend_user.id)
+    notif_key = f"{sender_label}:{friend_id}"
+    if notif_key in _NOTIFIED_ACCEPTS:
+        return
+    _NOTIFIED_ACCEPTS.add(notif_key)
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    friend_name = friend_user.name if hasattr(friend_user, 'name') else "Unknown"
+
+    print(f"  [🎉] Friend request ACCEPTED! {friend_name} ({friend_id}) accepted {sender_label}'s request at {timestamp} UTC")
+
+    # Send DM alert via the listener bot
+    if _LISTENER_CLIENT_REF and _LOG_TARGET_USER_ID:
+        try:
+            target = _LISTENER_CLIENT_REF.get_user(int(_LOG_TARGET_USER_ID))
+            if not target:
+                target = await _LISTENER_CLIENT_REF.fetch_user(int(_LOG_TARGET_USER_ID))
+            if target:
+                msg = (
+                    f"🎉 **Friend Request Accepted!**\n"
+                    f"• **Accepted By**: `{friend_name}` (`{friend_id}`)\n"
+                    f"• **Sender Account**: `{sender_label}`\n"
+                    f"• **Timestamp**: `{timestamp} UTC`"
+                )
+                await target.send(msg)
+        except Exception as e:
+            print(f"  [!] Failed to send acceptance DM alert: {e}")
+
 async def start_sender_gateway_client(token: str, label: str):
     """
     Connect a sender account to Discord Gateway in the background (Solution B).
     Maintains active heartbeat and session ID to simulate real browser presence.
+    Also listens for relationship updates to detect friend request acceptances.
     """
     if not token or token in SENDER_CLIENTS:
         return
@@ -32,6 +78,23 @@ async def start_sender_gateway_client(token: str, label: str):
     async def on_ready():
         print(f"  [+] Auto-Friend Sender Online via Gateway: {client.user} ({label})")
         print(f"      ↳ Gateway Latency: {round(client.latency * 1000)}ms | Ready for instant requests")
+        # Log initial outgoing pending count
+        outgoing = [r for r in client.relationships if r.type == discord.RelationshipType.outgoing_request]
+        print(f"      ↳ Outgoing Pending Requests: {len(outgoing)}")
+
+    @client.event
+    async def on_relationship_update(before, after):
+        """Fires when a relationship status changes (e.g. outgoing_request -> friend)."""
+        if (before.type == discord.RelationshipType.outgoing_request and
+                after.type == discord.RelationshipType.friend):
+            await notify_friend_accepted(sender_label=label, friend_user=after.user)
+
+    @client.event
+    async def on_relationship_add(relationship):
+        """Fires when a new relationship is created (could be an acceptance if type is friend)."""
+        if relationship.type == discord.RelationshipType.friend:
+            # This fires if Discord sends the relationship as a new add (instead of update)
+            await notify_friend_accepted(sender_label=label, friend_user=relationship.user)
 
     try:
         await client.start(token.strip())
@@ -39,6 +102,7 @@ async def start_sender_gateway_client(token: str, label: str):
         print(f"  [!] Auto-Friend Sender '{label}' Login Failure: Invalid or expired token (401).")
     except Exception as e:
         print(f"  [!] Auto-Friend Sender '{label}' Gateway Error: {e}")
+
 
 async def init_all_sender_clients():
     """Start gateway clients for all enabled sender accounts."""

@@ -7,7 +7,7 @@ import aiohttp
 from aiohttp import web
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
-from auto_friend import dispatch_auto_friend, init_all_sender_clients
+from auto_friend import dispatch_auto_friend, init_all_sender_clients, set_listener_ref
 from auto_friend_config import AUTO_FRIEND_SERVERS, ENABLE_AUTO_FRIEND_SYSTEM
 
 # Load local .env file if present
@@ -379,6 +379,10 @@ async def on_ready():
     # Recover any missed joins while offline
     await recover_missed_joins()
 
+    # Pass listener client reference for friend request acceptance alerts
+    if LOG_TARGET_USER_ID:
+        set_listener_ref(client, LOG_TARGET_USER_ID)
+
     # Start heartbeat loop in the background
     asyncio.create_task(heartbeat_loop())
 
@@ -534,6 +538,10 @@ async def main():
 
     # 2. Start Dummy Web Server
     await start_dummy_server()
+
+    # Pass listener client reference for friend request acceptance alerts
+    if LOG_TARGET_USER_ID:
+        set_listener_ref(client, LOG_TARGET_USER_ID)
 
     # 3. Start Auto-Friend Sender Gateway Clients (Solution B)
     await init_all_sender_clients()
