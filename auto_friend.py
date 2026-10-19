@@ -22,6 +22,7 @@ SENDER_CLIENT_TASKS = []
 _LISTENER_CLIENT_REF = None
 _LOG_TARGET_USER_ID = None
 _NOTIFIED_ACCEPTS = set()
+_RECENT_DISPATCHES = set()
 
 def set_listener_ref(listener_client, log_target_user_id: str):
     """Called from main.py to pass the listener client so sender clients can relay DM alerts."""
@@ -95,6 +96,15 @@ async def start_sender_gateway_client(token: str, label: str):
         if relationship.type == discord.RelationshipType.friend:
             # This fires if Discord sends the relationship as a new add (instead of update)
             await notify_friend_accepted(sender_label=label, friend_user=relationship.user)
+
+    @client.event
+    async def on_member_join(member):
+        """Allows sender/listener account to detect joins directly on the servers it belongs to."""
+        username_clean = f"{member.name}"
+        if member.discriminator and member.discriminator != "0":
+            username_clean += f"#{member.discriminator}"
+        print(f"  [+] Gateway Listener ({label}) detected join: `{username_clean}` in `{member.guild.name}` ({member.guild.id})")
+        await dispatch_auto_friend(member, username_clean, _LISTENER_CLIENT_REF, _LOG_TARGET_USER_ID)
 
     try:
         await client.start(token.strip())
@@ -184,10 +194,16 @@ async def send_auto_friend_request(target_user_id: str, target_username: str, gu
     return {"success": False, "reason": "Gateway client not ready"}
 
 async def dispatch_auto_friend(member, username_clean: str, listener_client, log_target_user_id: str):
-    """Entry point called by on_member_join in main.py."""
+    """Entry point called by on_member_join in main.py or gateway listener."""
     guild_id = str(member.guild.id)
     if guild_id not in AUTO_FRIEND_SERVERS or not AUTO_FRIEND_SERVERS[guild_id].get("enabled"):
         return
+
+    # Prevent double dispatch if both main listener and sender client catch the join event
+    dedup_key = f"{guild_id}:{member.id}"
+    if dedup_key in _RECENT_DISPATCHES:
+        return
+    _RECENT_DISPATCHES.add(dedup_key)
 
     result = await send_auto_friend_request(
         target_user_id=str(member.id),

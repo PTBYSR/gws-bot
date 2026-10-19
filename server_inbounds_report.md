@@ -42,4 +42,5 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **`coins.ph_hdawg.`** | Coins Community | `974604371860021289` | **ACTIVE [OK]** | Token valid, member of server |
 | **`allen.warfield.`** | Cryptex Commonwealth | `329712211989889026` | **ACTIVE [OK]** | Token valid, member of server |
+| **`nicliu___`** | PASE | `1330889066425749576` | **ACTIVE [OK]** | Token valid, member of server & Gateway listener |
 | **`king_arthur0001`** | Listener Bot | *All Guilds* | **ACTIVE [OK]** | Primary listener operational |

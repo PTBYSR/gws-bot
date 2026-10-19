@@ -12,5 +12,12 @@
     "sender_label": "coins.ph_hdawg.",
     "enabled": true,
     "delay_seconds": 1.5
+  },
+  "1330889066425749576": {
+    "server_name": "PASE",
+    "sender_token": "YOUR_SENDER_TOKEN_3",
+    "sender_label": "nicliu___",
+    "enabled": true,
+    "delay_seconds": 1.5
   }
 }
