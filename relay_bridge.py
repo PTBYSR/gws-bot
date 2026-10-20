@@ -6,7 +6,11 @@ Bridges DMs between target prospects and your private 'GWS Control' server:
    is automatically created under that sender's category: e.g. #claire-john
 2. When you type in that channel from your iPhone, the message is sent directly
    as a DM to the prospect from that specific sender account.
-3. When the prospect replies in DM, their reply appears in that exact channel.
+3. Supports full in-DM formatting:
+   - Native Message Replies (swiping or long-pressing Reply in Discord).
+   - Image & File attachments (uploading camera roll/photos, replying to pictures).
+   - Prospect Mentions: Typing @username, @them, @user, @target auto-converts to a real <@ID> mention!
+4. When the prospect replies or sends pictures in DM, they appear directly in that exact channel.
 """
 import os
 import re
@@ -18,11 +22,17 @@ from datetime import datetime, timezone
 # GWS Control Hub Server ID
 HUB_SERVER_ID = "1561888167936659528"
 
-# In-memory mappings:
+# In-memory channel mappings:
 # CHANNEL_ID -> {"target_user_id": str, "target_name": str, "sender_label": str, "sender_token": str}
 CHANNEL_TO_TARGET = {}
 # f"{sender_label}:{target_user_id}" -> channel_id
 TARGET_TO_CHANNEL = {}
+
+# Message ID mapping for 2-way native Discord replies:
+# HUB_MSG_ID -> {"dm_msg_id": int, "dm_channel_id": int}
+HUB_TO_DM_MSG = {}
+# DM_MSG_ID -> hub_msg_id (int)
+DM_TO_HUB_MSG = {}
 
 # Mongo DB reference (set from main.py)
 _DB_REF = None
@@ -32,8 +42,8 @@ def set_db_ref(db):
     _DB_REF = db
 
 async def load_relay_mappings_from_db():
-    """Load existing relay channels into memory on bot startup."""
-    global CHANNEL_TO_TARGET, TARGET_TO_CHANNEL
+    """Load existing relay channels and recent message mappings into memory on bot startup."""
+    global CHANNEL_TO_TARGET, TARGET_TO_CHANNEL, HUB_TO_DM_MSG, DM_TO_HUB_MSG
     if _DB_REF is None:
         return
     try:
@@ -51,6 +61,22 @@ async def load_relay_mappings_from_db():
         print(f"  [✓] Loaded {len(CHANNEL_TO_TARGET)} active relay channel mappings from database.")
     except Exception as e:
         print(f"  [!] Failed to load relay mappings from DB: {e}")
+
+    try:
+        # Load the 500 most recent message reply relationships
+        msg_cursor = _DB_REF.relay_message_map.find({}).sort("created_at", -1).limit(500)
+        loaded_msgs = 0
+        async for doc in msg_cursor:
+            h_id = str(doc.get("hub_msg_id"))
+            d_id = int(doc.get("dm_msg_id"))
+            c_id = int(doc.get("dm_channel_id"))
+            HUB_TO_DM_MSG[h_id] = {"dm_msg_id": d_id, "dm_channel_id": c_id}
+            DM_TO_HUB_MSG[str(d_id)] = int(h_id)
+            loaded_msgs += 1
+        if loaded_msgs > 0:
+            print(f"  [✓] Loaded {loaded_msgs} DM message reply links from database.")
+    except Exception as e:
+        print(f"  [!] Failed to load relay message reply links from DB: {e}")
 
 async def save_relay_mapping(channel_id: str, target_user_id: str, target_name: str, sender_label: str, sender_token: str):
     """Persist a new relay mapping."""
@@ -80,11 +106,49 @@ async def save_relay_mapping(channel_id: str, target_user_id: str, target_name: 
         except Exception as e:
             print(f"  [!] Failed to save relay mapping to DB: {e}")
 
+async def save_msg_mapping(hub_msg_id: str, dm_msg_id: int, dm_channel_id: int):
+    """Store link between GWS Control channel message and DM message for native replies."""
+    HUB_TO_DM_MSG[str(hub_msg_id)] = {"dm_msg_id": dm_msg_id, "dm_channel_id": dm_channel_id}
+    DM_TO_HUB_MSG[str(dm_msg_id)] = int(hub_msg_id)
+
+    if _DB_REF is not None:
+        try:
+            await _DB_REF.relay_message_map.update_one(
+                {"hub_msg_id": str(hub_msg_id)},
+                {"$set": {
+                    "hub_msg_id": str(hub_msg_id),
+                    "dm_msg_id": dm_msg_id,
+                    "dm_channel_id": dm_channel_id,
+                    "created_at": datetime.now(timezone.utc)
+                }},
+                upsert=True
+            )
+        except Exception:
+            pass
+
 def sanitize_channel_name(sender_label: str, target_name: str) -> str:
     """Format safe Discord channel name e.g. 'claire-johndoe'."""
     s_clean = re.sub(r'[^a-zA-Z0-9]', '', sender_label)[:6].lower()
     t_clean = re.sub(r'[^a-zA-Z0-9]', '', target_name)[:18].lower()
     return f"{s_clean}-{t_clean or 'user'}"
+
+def process_outbound_mentions(content: str, target_user_id: str, target_name: str) -> str:
+    """
+    Substitutes tags like @dalot, @dalot___, @them, @user, @target, @prospect
+    with the real Discord user mention <@USER_ID>.
+    """
+    if not content:
+        return content
+
+    base_name = re.sub(r'[^a-zA-Z0-9_]', '', target_name).lower()
+    short_name = base_name.rstrip('_')
+    name_patterns = [re.escape(base_name)]
+    if short_name and short_name != base_name:
+        name_patterns.append(re.escape(short_name))
+
+    pattern_names = "|".join(name_patterns + ["target", "them", "user", "prospect", "you"])
+    regex = re.compile(rf"@({pattern_names})\b", re.IGNORECASE)
+    return regex.sub(f"<@{target_user_id}>", content)
 
 async def get_or_create_relay_channel(hub_client, sender_label: str, sender_token: str, target_user, origin_server_name: str = "Unknown"):
     """
@@ -159,7 +223,10 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
             f"• **Started**: `{timestamp} UTC`\n"
             f"─────────────────────────────────────\n"
             f"💬 **How to chat from your iPhone:**\n"
-            f"Type your message directly in this channel. `{sender_label}` will automatically deliver it as a DM to `{target_name}`!\n"
+            f"• Type your message directly here — `{sender_label}` sends it as a DM to `{target_name}`!\n"
+            f"• **Replies**: Swipe or tap 'Reply' on any message (text or photo) to reply natively.\n"
+            f"• **Photos**: Upload pictures from your camera roll — they are sent as native image files.\n"
+            f"• **Mentions**: Type `@them`, `@user`, or `@{target_name}` to ping them in DM.\n"
             f"*(A ✅ reaction confirms successful delivery).* "
         )
         await new_channel.send(banner)
@@ -173,6 +240,7 @@ async def handle_outbound_relay_message(message, sender_clients_map):
     """
     Called when you send a message in GWS Control.
     Delivers the message as a DM from the mapped sender account to the prospect.
+    Supports replies, images/attachments, and mention replacement.
     """
     if not message.guild or str(message.guild.id) != str(HUB_SERVER_ID):
         return False
@@ -188,6 +256,7 @@ async def handle_outbound_relay_message(message, sender_clients_map):
 
     sender_token = mapping["sender_token"]
     target_user_id = mapping["target_user_id"]
+    target_name = mapping.get("target_name", "user")
     sender_label = mapping["sender_label"]
 
     client = sender_clients_map.get(sender_token)
@@ -204,17 +273,60 @@ async def handle_outbound_relay_message(message, sender_clients_map):
             await message.channel.send(f"❌ Could not find prospect user `{target_user_id}` on Discord.")
             return True
 
-        # Forward content
-        content = message.content or ""
-        if message.attachments:
-            att_urls = "\n".join([a.url for a in message.attachments])
-            content = f"{content}\n{att_urls}" if content else att_urls
+        # 1. Process Mentions (@them, @user, @prospect, @username -> <@id>)
+        content = process_outbound_mentions(message.content or "", target_user_id, target_name)
 
-        if not content.strip():
+        # 2. Process Attachments / Pictures
+        files = []
+        if message.attachments:
+            for a in message.attachments:
+                try:
+                    f = await a.to_file()
+                    files.append(f)
+                except Exception as err:
+                    print(f"  [!] Failed to stream outbound attachment {a.filename}: {err}")
+                    # Fallback to appending URL if file conversion fails
+                    content = f"{content}\n{a.url}" if content else a.url
+
+        if not content.strip() and not files:
             return True
 
-        # Send DM as the sender account!
-        await target_user.send(content)
+        # 3. Check if replying to a specific message or picture
+        dm_channel = target_user.dm_channel or await target_user.create_dm()
+        dm_reference = None
+        if message.reference and message.reference.message_id:
+            ref_hub_id = str(message.reference.message_id)
+            dm_meta = HUB_TO_DM_MSG.get(ref_hub_id)
+            if dm_meta:
+                dm_reference = discord.MessageReference(
+                    message_id=int(dm_meta["dm_msg_id"]),
+                    channel_id=int(dm_meta["dm_channel_id"]),
+                    fail_if_not_exists=False
+                )
+
+        # 4. Send DM as the sender account!
+        dm_sent = None
+        if dm_reference:
+            try:
+                dm_sent = await dm_channel.send(
+                    content=content if content.strip() else None,
+                    files=files if files else None,
+                    reference=dm_reference
+                )
+            except Exception as re:
+                print(f"  [!] Reference send error ({re}), sending as standard DM...")
+                dm_sent = None
+
+        if not dm_sent:
+            dm_sent = await dm_channel.send(
+                content=content if content.strip() else None,
+                files=files if files else None
+            )
+
+        # 5. Link this outbound message for future replies
+        if dm_sent:
+            await save_msg_mapping(str(message.id), dm_sent.id, dm_channel.id)
+
         # React with checkmark to confirm delivery to user on iPhone!
         await message.add_reaction("✅")
         print(f"  [→] Outbound Relay: Delivered message to {target_user.name} via {sender_label}")
@@ -232,7 +344,9 @@ async def handle_outbound_relay_message(message, sender_clients_map):
 async def handle_inbound_dm(sender_label: str, sender_token: str, dm_message, hub_client):
     """
     Called when a prospect DMs one of your sender accounts.
-    Mirrors their message into their assigned channel in GWS Control.
+    Mirrors their message into their assigned channel in GWS Control with:
+    - Real picture/file uploads
+    - Native replies linked if they replied to your DM
     """
     # Find or create channel
     channel = await get_or_create_relay_channel(
@@ -244,10 +358,53 @@ async def handle_inbound_dm(sender_label: str, sender_token: str, dm_message, hu
 
     if channel:
         content = dm_message.content or ""
-        if dm_message.attachments:
-            att_urls = "\n".join([a.url for a in dm_message.attachments])
-            content = f"{content}\n{att_urls}" if content else att_urls
-
         sender_name = dm_message.author.name
-        await channel.send(f"👤 **{sender_name}**: {content}")
+
+        # 1. Process Attachments / Pictures
+        files = []
+        if dm_message.attachments:
+            for a in dm_message.attachments:
+                try:
+                    f = await a.to_file()
+                    files.append(f)
+                except Exception as err:
+                    print(f"  [!] Failed to stream inbound attachment {a.filename}: {err}")
+                    content = f"{content}\n{a.url}" if content else a.url
+
+        # 2. Check if the prospect replied to one of our DMs
+        hub_reference = None
+        if dm_message.reference and dm_message.reference.message_id:
+            ref_dm_id = str(dm_message.reference.message_id)
+            hub_ref_id = DM_TO_HUB_MSG.get(ref_dm_id)
+            if hub_ref_id:
+                hub_reference = discord.MessageReference(
+                    message_id=int(hub_ref_id),
+                    channel_id=channel.id,
+                    fail_if_not_exists=False
+                )
+
+        header = f"👤 **{sender_name}**:"
+        text = f"{header} {content}" if content else header
+
+        sent_hub_msg = None
+        if hub_reference:
+            try:
+                sent_hub_msg = await channel.send(
+                    content=text,
+                    files=files if files else None,
+                    reference=hub_reference
+                )
+            except Exception:
+                sent_hub_msg = None
+
+        if not sent_hub_msg:
+            sent_hub_msg = await channel.send(
+                content=text,
+                files=files if files else None
+            )
+
+        # 3. Store link for 2-way native replies
+        if sent_hub_msg:
+            await save_msg_mapping(str(sent_hub_msg.id), dm_message.id, dm_message.channel.id)
+
         print(f"  [←] Inbound Relay: Mirrored DM from {sender_name} to #{channel.name}")
