@@ -534,6 +534,27 @@ async def on_message(message):
             
         await message.channel.send(reply)
 
+@client.event
+async def on_message_edit(before, after):
+    """Handle editing messages in GWS Control Hub (outbound relay)."""
+    try:
+        from relay_bridge import handle_outbound_relay_edit
+        from auto_friend import SENDER_CLIENTS
+        await handle_outbound_relay_edit(before, after, SENDER_CLIENTS)
+    except Exception as e:
+        print(f"  [!] Relay outbound edit error: {e}")
+
+@client.event
+async def on_message_delete(message):
+    """Handle deleting messages in GWS Control Hub (outbound relay)."""
+    try:
+        from relay_bridge import handle_outbound_relay_delete
+        from auto_friend import SENDER_CLIENTS
+        await handle_outbound_relay_delete(message, SENDER_CLIENTS)
+    except Exception as e:
+        print(f"  [!] Relay outbound delete error: {e}")
+
+
 
 # â”€â”€â”€ Dummy Web Server (For Render Healthcheck) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def handle_ping(request):

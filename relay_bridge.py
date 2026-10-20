@@ -408,3 +408,158 @@ async def handle_inbound_dm(sender_label: str, sender_token: str, dm_message, hu
             await save_msg_mapping(str(sent_hub_msg.id), dm_message.id, dm_message.channel.id)
 
         print(f"  [←] Inbound Relay: Mirrored DM from {sender_name} to #{channel.name}")
+
+async def handle_outbound_relay_edit(before, after, sender_clients_map):
+    """
+    Called when you edit a message in GWS Control on your iPhone.
+    Updates the sent message in the prospect's DM.
+    """
+    if not after.guild or str(after.guild.id) != str(HUB_SERVER_ID):
+        return False
+    if after.author.bot:
+        return False
+
+    cid = str(after.channel.id)
+    mapping = CHANNEL_TO_TARGET.get(cid)
+    if not mapping:
+        return False
+
+    dm_meta = HUB_TO_DM_MSG.get(str(after.id))
+    if not dm_meta:
+        return False
+
+    sender_token = mapping["sender_token"]
+    sender_label = mapping["sender_label"]
+    target_user_id = mapping["target_user_id"]
+    target_name = mapping.get("target_name", "user")
+
+    client = sender_clients_map.get(sender_token)
+    if not client or not client.is_ready():
+        return False
+
+    try:
+        dm_channel = client.get_channel(int(dm_meta["dm_channel_id"]))
+        if not dm_channel:
+            dm_channel = await client.fetch_channel(int(dm_meta["dm_channel_id"]))
+
+        if dm_channel:
+            new_content = process_outbound_mentions(after.content or "", target_user_id, target_name)
+            partial = dm_channel.get_partial_message(int(dm_meta["dm_msg_id"]))
+            await partial.edit(content=new_content)
+            await after.add_reaction("✏️")
+            print(f"  [✏️] Outbound Relay: Edited message in DM via {sender_label}")
+            return True
+    except Exception as e:
+        print(f"  [!] Failed to edit outbound DM message: {e}")
+        return False
+
+async def handle_outbound_relay_delete(message, sender_clients_map):
+    """
+    Called when you delete a message in GWS Control on your iPhone.
+    Deletes the sent message in the prospect's DM.
+    """
+    if not message.guild or str(message.guild.id) != str(HUB_SERVER_ID):
+        return False
+    if message.author.bot:
+        return False
+
+    cid = str(message.channel.id)
+    mapping = CHANNEL_TO_TARGET.get(cid)
+    if not mapping:
+        return False
+
+    dm_meta = HUB_TO_DM_MSG.get(str(message.id))
+    if not dm_meta:
+        return False
+
+    sender_token = mapping["sender_token"]
+    sender_label = mapping["sender_label"]
+
+    client = sender_clients_map.get(sender_token)
+    if not client or not client.is_ready():
+        return False
+
+    try:
+        dm_channel = client.get_channel(int(dm_meta["dm_channel_id"]))
+        if not dm_channel:
+            dm_channel = await client.fetch_channel(int(dm_meta["dm_channel_id"]))
+
+        if dm_channel:
+            partial = dm_channel.get_partial_message(int(dm_meta["dm_msg_id"]))
+            await partial.delete()
+            print(f"  [🗑️] Outbound Relay: Deleted message in DM via {sender_label}")
+            return True
+    except Exception as e:
+        print(f"  [!] Failed to delete outbound DM message: {e}")
+        return False
+
+async def handle_inbound_dm_edit(sender_label: str, sender_token: str, dm_message, hub_client):
+    """
+    Called when the prospect edits their DM message.
+    Updates the mirrored message in the GWS Control channel.
+    """
+    ref_dm_id = str(dm_message.id)
+    hub_msg_id = DM_TO_HUB_MSG.get(ref_dm_id)
+    if not hub_msg_id or not hub_client:
+        return
+
+    key = f"{sender_label}:{dm_message.author.id}"
+    cid = TARGET_TO_CHANNEL.get(key)
+    if not cid:
+        return
+
+    hub_channel = hub_client.get_channel(int(cid))
+    if not hub_channel:
+        try:
+            hub_channel = await hub_client.fetch_channel(int(cid))
+        except Exception:
+            return
+
+    if hub_channel:
+        try:
+            partial_hub = hub_channel.get_partial_message(int(hub_msg_id))
+            sender_name = dm_message.author.name
+            await partial_hub.edit(content=f"👤 **{sender_name}** *(edited)*: {dm_message.content}")
+            print(f"  [✏️] Inbound Relay: Updated edited message from {sender_name} in #{hub_channel.name}")
+        except Exception as e:
+            print(f"  [!] Failed to update edited message in Hub: {e}")
+
+async def handle_inbound_dm_delete(sender_label: str, sender_token: str, dm_message, hub_client):
+    """
+    Called when the prospect deletes/unsends a DM.
+    Marks the message in GWS Control with strikethrough so you can still see what was unsent!
+    """
+    ref_dm_id = str(dm_message.id)
+    hub_msg_id = DM_TO_HUB_MSG.get(ref_dm_id)
+    if not hub_msg_id or not hub_client:
+        return
+
+    key = f"{sender_label}:{dm_message.author.id}"
+    cid = TARGET_TO_CHANNEL.get(key)
+    if not cid:
+        return
+
+    hub_channel = hub_client.get_channel(int(cid))
+    if not hub_channel:
+        try:
+            hub_channel = await hub_client.fetch_channel(int(cid))
+        except Exception:
+            return
+
+    if hub_channel:
+        try:
+            hub_msg = await hub_channel.fetch_message(int(hub_msg_id))
+            if hub_msg:
+                orig_text = hub_msg.content
+                # Strip prefix
+                prefix = f"👤 **{dm_message.author.name}**:"
+                if orig_text.startswith(prefix):
+                    raw = orig_text[len(prefix):].strip()
+                    await hub_msg.edit(content=f"👤 **{dm_message.author.name}**: ~~{raw}~~ 🗑️ *(unsent)*")
+                else:
+                    await hub_msg.edit(content=f"{orig_text} 🗑️ *(unsent by prospect)*")
+                await hub_msg.add_reaction("🗑️")
+                print(f"  [🗑️] Inbound Relay: Marked unsent message from {dm_message.author.name} in #{hub_channel.name}")
+        except Exception as e:
+            print(f"  [!] Failed to update deleted message in Hub: {e}")
+

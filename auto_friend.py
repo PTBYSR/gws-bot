@@ -128,6 +128,39 @@ async def start_sender_gateway_client(token: str, label: str):
                 print(f"  [!] Error handling inbound relay DM on {label}: {e}")
 
     @client.event
+    async def on_message_edit(before, after):
+        """Relay edited DM from prospect to GWS Control Hub channel."""
+        if after.guild is None and after.author.id != client.user.id:
+            try:
+                from relay_bridge import handle_inbound_dm_edit
+                if _LISTENER_CLIENT_REF:
+                    await handle_inbound_dm_edit(
+                        sender_label=label,
+                        sender_token=token,
+                        dm_message=after,
+                        hub_client=_LISTENER_CLIENT_REF
+                    )
+            except Exception as e:
+                print(f"  [!] Error handling inbound DM edit on {label}: {e}")
+
+    @client.event
+    async def on_message_delete(message):
+        """Relay deleted DM from prospect to GWS Control Hub channel."""
+        if message.guild is None and message.author.id != client.user.id:
+            try:
+                from relay_bridge import handle_inbound_dm_delete
+                if _LISTENER_CLIENT_REF:
+                    await handle_inbound_dm_delete(
+                        sender_label=label,
+                        sender_token=token,
+                        dm_message=message,
+                        hub_client=_LISTENER_CLIENT_REF
+                    )
+            except Exception as e:
+                print(f"  [!] Error handling inbound DM delete on {label}: {e}")
+
+
+    @client.event
     async def on_member_join(member):
         """Allows sender/listener account to detect joins directly on the servers it belongs to."""
         username_clean = f"{member.name}"
