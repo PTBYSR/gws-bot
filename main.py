@@ -150,11 +150,19 @@ async def save_servers_to_db(guilds, user):
 
 # â”€â”€â”€ Client Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 client = discord.Client()
+_RECENT_JOIN_DMS = set()
 
 async def send_dm_alert(member, username_clean, is_recovery=False):
     """Send a DM alert about a new member join."""
     if not LOG_TARGET_USER_ID:
         return
+
+    # Deduplicate join DMs to avoid repeated alerts for the same join
+    dedup_key = f"{member.guild.id}:{member.id}"
+    if dedup_key in _RECENT_JOIN_DMS:
+        return
+    _RECENT_JOIN_DMS.add(dedup_key)
+
     try:
         target_user = (
             client.get_user(int(LOG_TARGET_USER_ID))
