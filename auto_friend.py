@@ -30,8 +30,8 @@ def set_listener_ref(listener_client, log_target_user_id: str):
     _LISTENER_CLIENT_REF = listener_client
     _LOG_TARGET_USER_ID = log_target_user_id
 
-async def notify_friend_accepted(sender_label: str, friend_user):
-    """Send a DM alert and console log when a target user accepts a friend request."""
+async def notify_friend_accepted(sender_label: str, friend_user, sender_token: str = ""):
+    """Send a DM alert, spawn a dedicated relay channel in GWS Control Hub, and log."""
     if not friend_user:
         return
 
@@ -46,7 +46,20 @@ async def notify_friend_accepted(sender_label: str, friend_user):
 
     print(f"  [🎉] Friend request ACCEPTED! {friend_name} ({friend_id}) accepted {sender_label}'s request at {timestamp} UTC")
 
-    # Send DM alert via the listener bot
+    # 1. Spawn a dedicated Relay Channel in GWS Control Hub for chatting
+    try:
+        if _LISTENER_CLIENT_REF and sender_token:
+            from relay_bridge import get_or_create_relay_channel
+            await get_or_create_relay_channel(
+                hub_client=_LISTENER_CLIENT_REF,
+                sender_label=sender_label,
+                sender_token=sender_token,
+                target_user=friend_user
+            )
+    except Exception as e:
+        print(f"  [!] Failed to spawn relay channel: {e}")
+
+    # 2. Send DM alert via the listener bot
     if _LISTENER_CLIENT_REF and _LOG_TARGET_USER_ID:
         try:
             target = _LISTENER_CLIENT_REF.get_user(int(_LOG_TARGET_USER_ID))
@@ -57,7 +70,8 @@ async def notify_friend_accepted(sender_label: str, friend_user):
                     f"🎉 **Friend Request Accepted!**\n"
                     f"• **Accepted By**: `{friend_name}` (`{friend_id}`)\n"
                     f"• **Sender Account**: `{sender_label}`\n"
-                    f"• **Timestamp**: `{timestamp} UTC`"
+                    f"• **Timestamp**: `{timestamp} UTC`\n"
+                    f"💬 *A dedicated chat channel was created in GWS Control for you to DM them!*"
                 )
                 await target.send(msg)
         except Exception as e:
@@ -67,7 +81,7 @@ async def start_sender_gateway_client(token: str, label: str):
     """
     Connect a sender account to Discord Gateway in the background (Solution B).
     Maintains active heartbeat and session ID to simulate real browser presence.
-    Also listens for relationship updates to detect friend request acceptances.
+    Also listens for relationship updates and inbound DMs for 2-way relay.
     """
     if not token or token in SENDER_CLIENTS:
         return
@@ -88,14 +102,30 @@ async def start_sender_gateway_client(token: str, label: str):
         """Fires when a relationship status changes (e.g. outgoing_request -> friend)."""
         if (before.type == discord.RelationshipType.outgoing_request and
                 after.type == discord.RelationshipType.friend):
-            await notify_friend_accepted(sender_label=label, friend_user=after.user)
+            await notify_friend_accepted(sender_label=label, friend_user=after.user, sender_token=token)
 
     @client.event
     async def on_relationship_add(relationship):
         """Fires when a new relationship is created (could be an acceptance if type is friend)."""
         if relationship.type == discord.RelationshipType.friend:
             # This fires if Discord sends the relationship as a new add (instead of update)
-            await notify_friend_accepted(sender_label=label, friend_user=relationship.user)
+            await notify_friend_accepted(sender_label=label, friend_user=relationship.user, sender_token=token)
+
+    @client.event
+    async def on_message(message):
+        """Relay inbound DMs from prospects to the GWS Control Hub channel."""
+        if message.guild is None and message.author.id != client.user.id:
+            try:
+                from relay_bridge import handle_inbound_dm
+                if _LISTENER_CLIENT_REF:
+                    await handle_inbound_dm(
+                        sender_label=label,
+                        sender_token=token,
+                        dm_message=message,
+                        hub_client=_LISTENER_CLIENT_REF
+                    )
+            except Exception as e:
+                print(f"  [!] Error handling inbound relay DM on {label}: {e}")
 
     @client.event
     async def on_member_join(member):

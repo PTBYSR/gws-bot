@@ -45,7 +45,13 @@ async def connect_mongo():
         # Verify connection
         await mongo_client.admin.command("ping")
         db = mongo_client["gws_bot_logger"]
-        print("  [âœ“] Connected to MongoDB Atlas")
+        print("  [✓] Connected to MongoDB Atlas")
+        try:
+            import relay_bridge
+            relay_bridge.set_db_ref(db)
+            await relay_bridge.load_relay_mappings_from_db()
+        except Exception as re:
+            print(f"  [!] Relay bridge initialization note: {re}")
         return True
     except Exception as e:
         print(f"  [!] Failed to connect to MongoDB: {e}")
@@ -437,9 +443,19 @@ async def on_member_join(member):
 
 @client.event
 async def on_message(message):
-    """Option A: Live event detection test trigger."""
+    """Option A: Live event detection test trigger and Relay Outbound Bridge."""
     if message.author.id == client.user.id:
         return
+
+    # Two-Way Channel DM Simulator (Relay Outbound to Prospect)
+    try:
+        from relay_bridge import handle_outbound_relay_message
+        from auto_friend import SENDER_CLIENTS
+        if await handle_outbound_relay_message(message, SENDER_CLIENTS):
+            return
+    except Exception as e:
+        print(f"  [!] Relay outbound error: {e}")
+
     if LOG_TARGET_USER_ID and str(message.author.id) != str(LOG_TARGET_USER_ID):
         return
 
