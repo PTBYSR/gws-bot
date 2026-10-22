@@ -3,3 +3,5 @@ logs/
 __pycache__/
 whatsapp/node_modules/
 servers_config.json
+scratch/
+

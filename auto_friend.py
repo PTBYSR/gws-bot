@@ -50,14 +50,26 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
     try:
         if _LISTENER_CLIENT_REF and sender_token:
             from relay_bridge import get_or_create_relay_channel
+            origin_name = "Unknown"
+            try:
+                from auto_friend_config import AUTO_FRIEND_SERVERS
+                for gid, cfg in AUTO_FRIEND_SERVERS.items():
+                    if cfg.get("sender_label") == sender_label or cfg.get("sender_token") == sender_token:
+                        origin_name = cfg.get("server_name", "Unknown")
+                        break
+            except Exception:
+                pass
+
             await get_or_create_relay_channel(
                 hub_client=_LISTENER_CLIENT_REF,
                 sender_label=sender_label,
                 sender_token=sender_token,
-                target_user=friend_user
+                target_user=friend_user,
+                origin_server_name=origin_name
             )
     except Exception as e:
         print(f"  [!] Failed to spawn relay channel: {e}")
+
 
     # 2. Send DM alert via the listener bot
     if _LISTENER_CLIENT_REF and _LOG_TARGET_USER_ID:

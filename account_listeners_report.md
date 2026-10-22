@@ -7,3 +7,12 @@
 | **`coins.ph_hdawg.`** | **Coins Community** (`974604371860021289`) | `rams.eytn.wdeborah1955@gmail.com` | **0** *(Clean server)* |
 | **`nicliu___`** | **PASE** (`1330889066425749576`) | `nicliu236@gmail.com` | **0** *(Clean server)* |
 | **`claireguerita`** | **Elite Crypto Signals** (`398075210949066764`) | `claireguerita@gmail.com` | **1 fake admin** (`.ecsadmin0.` @ **1m 34s**) |
+| **`talon.1977._`** | **Underground Trading Company** (`958180490957975612`) | `pasetechnologies@gmail.com` | **0** *(Token Active & Screened [OK])* |
+| **`brendan.guastaferro._`** | **Team Alpha Trading** (`774685007780380683`) | `alvinmaduka@gmail.com` | **2 fake admins** (`brendanguastaferro728`, `brendanguastaferroor`) |
+| **`rhu.wan`** | **Stock Market Chat** (`964204570840539166`) | `info@murdochvault.com` | **2 fake admins** (`stonkmaster345`, `stonkmaster04182`) |
+| **`iam.vk7._`** | **Trading University** (`1122865043952898128`) | `info@westcorevault.com` | **0** *(Token Active & Screened [OK])* |
+
+
+
+
+

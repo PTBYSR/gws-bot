@@ -65,7 +65,36 @@ AUTO_FRIEND_SERVERS = {
         "enabled": True,
         "delay_seconds": 1.5,
     },
+    "958180490957975612": {
+        "server_name": "Underground Trading Company",
+        "sender_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr"),
+        "sender_label": "talon.1977._",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+    "774685007780380683": {
+        "server_name": "Team Alpha Trading",
+        "sender_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv"),
+        "sender_label": "brendan.guastaferro._",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+    "964204570840539166": {
+        "server_name": "Stock Market Chat",
+        "sender_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0"),
+        "sender_label": "rhu.wan",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+    "1122865043952898128": {
+        "server_name": "Trading University",
+        "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR2ZVVHVuLkdNempCenNrckFQNVhaTndLRURucHdYY0RmeGhGdHo2VVUzRENJ"),
+        "sender_label": "iam.vk7._",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
 }
+
 
 # Optional overrides from local servers_config.json (if present)
 if os.path.exists(JSON_CONFIG_PATH):

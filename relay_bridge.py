@@ -170,6 +170,18 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
     target_name = target_user.name if hasattr(target_user, 'name') else "prospect"
     key = f"{sender_label}:{target_id_str}"
 
+    # Auto-resolve origin server name if Unknown
+    if origin_server_name == "Unknown":
+        try:
+            from auto_friend_config import AUTO_FRIEND_SERVERS
+            for gid, cfg in AUTO_FRIEND_SERVERS.items():
+                if cfg.get("sender_label") == sender_label or cfg.get("sender_token") == sender_token:
+                    origin_server_name = cfg.get("server_name", "Unknown")
+                    break
+        except Exception:
+            pass
+
+
     # 1. Check existing channel mapping
     if key in TARGET_TO_CHANNEL:
         cid = int(TARGET_TO_CHANNEL[key])
