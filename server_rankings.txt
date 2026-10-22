@@ -1,0 +1,80 @@
+================================================================================
+SERVER RANKINGS: LISTENER PERFORMANCE & SAFETY AUDIT
+Generated: October 22, 2026
+Criteria: Chat Activity | Fake Admin / Ban Risk | Join Inflow Velocity
+================================================================================
+
+#1 - Coins Community (ID: 974604371860021289)
+--------------------------------------------------------------------------------
+Account:           coins.ph_hdawg.
+Members / Online:  17,387 total / ~208 online
+Fake Admins:       0 (Completely clean)
+Join Flow:         High
+Verdict:           BEST ALL-ROUNDER. Steady genuine member joins, zero impersonator
+                   competition, low ban/moderation risk. Safest high-volume choice.
+
+#2 - Cryptex Commonwealth (ID: 1047248383921864834)
+--------------------------------------------------------------------------------
+Account:           allen.warfield.
+Members / Online:  7,137 total / ~219 online
+Fake Admins:       0 (Completely clean)
+Join Flow:         Medium - High
+Verdict:           TOP CLEAN CRYPTO HUB. Genuine trader conversations, no spoofing
+                   swarms, highly reliable prospects.
+
+#3 - Team Alpha Trading (ID: 774685007780380683)
+--------------------------------------------------------------------------------
+Account:           brendan.guastaferro._
+Members / Online:  12,017 total / ~961 online
+Fake Admins:       2 detected (brendanguastaferro728, brendanguastaferroor)
+Join Flow:         Very High
+Verdict:           HIGHEST VOLUME & ACTIVITY. Rapid conversation and alert stream.
+                   High prospect inflow; requires staying ahead of the 2 impersonators.
+
+#4 - Stock Market Chat (ID: 964204570840539166)
+--------------------------------------------------------------------------------
+Account:           rhu.wan
+Members / Online:  10,631 total / ~684 online
+Fake Admins:       2 detected (stonkmaster345, stonkmaster04182)
+Join Flow:         High
+Verdict:           STRONG STOCK/OPTIONS HUB. Steady join velocity with moderate
+                   fake admin competition. Excellent for equities outreach.
+
+#5 - Trading University (ID: 1122865043952898128)
+--------------------------------------------------------------------------------
+Account:           iam.vk7._
+Members / Online:  5,856 total / Active verification room
+Fake Admins:       1 detected (_iamvkk7 targeting owner iamvk7)
+Join Flow:         Moderate
+Verdict:           SPECIALIZED COMMUNITY. Requires bot role verification to unlock
+                   sub-channels. Low overall spam, controlled prospect pool.
+
+#6 - Underground Trading Company (ID: 958180490957975612)
+--------------------------------------------------------------------------------
+Account:           talon.1977._
+Members / Online:  705 total / ~40 online
+Fake Admins:       0 (Completely clean)
+Join Flow:         Low
+Verdict:           SAFEST / LOWEST RISK. Zero fake admins and friendly atmosphere,
+                   but limited member pool and slower join pace.
+
+#7 - Elite Crypto Signals (ID: 398075210949066764)
+--------------------------------------------------------------------------------
+Account:           claireguerita
+Members / Online:  ~45,000 total
+Fake Admins:       High / Aggressive (.ecsadmin0. @ 1m 34s reaction time)
+Join Flow:         Very High
+Verdict:           HIGH RISK / HIGH REWARD. Massive join volume, but heavily
+                   targeted by automated fake admin scripts and aggressive mod bans.
+
+================================================================================
+RECOMMENDED STRATEGY
+================================================================================
+1. Maximum Safety & Stable Outreach:
+   Prioritize Coins Community (#1) and Cryptex Commonwealth (#2). Clean servers
+   prevent account flags and minimize Discord anti-spam interference.
+
+2. Maximum Lead Volume & Scale:
+   Deploy Team Alpha Trading (#3) and Stock Market Chat (#4). Highest active
+   users and fastest lead velocity.
+================================================================================
