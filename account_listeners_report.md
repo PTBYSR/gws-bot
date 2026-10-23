@@ -11,6 +11,9 @@
 | **`brendan.guastaferro._`** | **Team Alpha Trading** (`774685007780380683`) | `alvinmaduka@gmail.com` | **2 fake admins** (`brendanguastaferro728`, `brendanguastaferroor`) |
 | **`rhu.wan`** | **Stock Market Chat** (`964204570840539166`) | `info@murdochvault.com` | **2 fake admins** (`stonkmaster345`, `stonkmaster04182`) |
 | **`iam.vk7._`** | **Trading University** (`1122865043952898128`) | `info@westcorevault.com` | **0** *(Token Active & Screened [OK])* |
+| **`adem__82099`** | **Verified Wealth** (`1334980338467733596`) | `claireguerita@gmail.com` | **0** *(Token Active & Profile Updated [OK])* |
+| **`horizon.trading`** | **Horizon Trading** (`563389318773604382`) | `kyliandickson900@gmail.com` | **1 fake admin** (`horizontradiing`) |
+| **`ecsadmin_`** | **Elite Crypto Signals** (`398075210949066764`) | `meldridwilson@gmail.com` | **1 fake admin** (`.ecsadmin0.` @ **1m 34s**) *(Token Active & In Guild [OK])* |
 
 
 

@@ -23,12 +23,78 @@ _LISTENER_CLIENT_REF = None
 _LOG_TARGET_USER_ID = None
 _NOTIFIED_ACCEPTS = set()
 _RECENT_DISPATCHES = set()
+_RECENT_JOIN_DMS = set()
 
 def set_listener_ref(listener_client, log_target_user_id: str):
     """Called from main.py to pass the listener client so sender clients can relay DM alerts."""
     global _LISTENER_CLIENT_REF, _LOG_TARGET_USER_ID
     _LISTENER_CLIENT_REF = listener_client
     _LOG_TARGET_USER_ID = log_target_user_id
+
+async def send_join_alert_dm(member, username_clean: str, listener_client, log_target_user_id: str):
+    """Send the standard New Join DM alert to the designated user from gateway listener."""
+    if not listener_client or not log_target_user_id:
+        return
+
+    dedup_key = f"{member.guild.id}:{member.id}"
+    if dedup_key in _RECENT_JOIN_DMS:
+        return
+    _RECENT_JOIN_DMS.add(dedup_key)
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    log_entry = f"[{timestamp}] `{username_clean}` joined `{member.guild.name}`"
+    print(log_entry)
+
+    # Save to local log file
+    try:
+        logs_dir = os.path.join(os.path.dirname(__file__), "logs")
+        os.makedirs(logs_dir, exist_ok=True)
+        with open(os.path.join(logs_dir, "joins.log"), "a", encoding="utf-8") as f:
+            f.write(log_entry + "\n")
+    except Exception as e:
+        print(f"  [!] Failed to write to log file: {e}")
+
+    # Save to MongoDB
+    try:
+        from relay_bridge import _DB_REF
+        if _DB_REF is not None:
+            await _DB_REF.joins.insert_one({
+                "user_id": str(member.id),
+                "username": username_clean,
+                "guild_id": str(member.guild.id),
+                "guild_name": member.guild.name,
+                "joined_at": member.joined_at or datetime.now(timezone.utc),
+                "logged_at": datetime.now(timezone.utc),
+                "timestamp_str": timestamp,
+                "source": "gateway_listener"
+            })
+    except Exception as e:
+        print(f"  [!] Failed to save join to MongoDB: {e}")
+
+    # Send DM to specified user
+    try:
+        target_user = (
+            listener_client.get_user(int(log_target_user_id))
+            or await listener_client.fetch_user(int(log_target_user_id))
+        )
+        if target_user:
+            creation_date = "Unknown"
+            if member.created_at:
+                d = member.created_at
+                suffix = 'th' if 11 <= d.day <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d.day % 10, 'th')
+                creation_date = f"{d.day}{suffix} {d.strftime('%B %Y')}"
+
+            dm_message = (
+                f"**New Join**\n"
+                f"• User: `{username_clean}`\n"
+                f"• ID: `{member.id}`\n"
+                f"• Created: `{creation_date}`\n"
+                f"• Server: `{member.guild.name}`"
+            )
+            await target_user.send(dm_message)
+            print(f"  [✓] DM alert successfully sent to {log_target_user_id} for `{username_clean}`")
+    except Exception as e:
+        print(f"  [!] Failed to send join DM to {log_target_user_id}: {e}")
 
 async def notify_friend_accepted(sender_label: str, friend_user, sender_token: str = ""):
     """Send a DM alert, spawn a dedicated relay channel in GWS Control Hub, and log."""
@@ -182,6 +248,9 @@ async def start_sender_gateway_client(token: str, label: str):
         if member.discriminator and member.discriminator != "0":
             username_clean += f"#{member.discriminator}"
         print(f"  [+] Gateway Listener ({label}) detected join: `{username_clean}` in `{member.guild.name}` ({member.guild.id})")
+        # 1. Send the New Join DM alert FIRST
+        await send_join_alert_dm(member, username_clean, _LISTENER_CLIENT_REF, _LOG_TARGET_USER_ID)
+        # 2. Dispatch Auto-Friend request
         await dispatch_auto_friend(member, username_clean, _LISTENER_CLIENT_REF, _LOG_TARGET_USER_ID)
 
     try:

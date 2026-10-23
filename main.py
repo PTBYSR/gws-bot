@@ -150,7 +150,7 @@ async def save_servers_to_db(guilds, user):
 
 # â”€â”€â”€ Client Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 client = discord.Client()
-_RECENT_JOIN_DMS = set()
+from auto_friend import _RECENT_JOIN_DMS
 
 async def send_dm_alert(member, username_clean, is_recovery=False):
     """Send a DM alert about a new member join."""

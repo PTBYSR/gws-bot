@@ -43,6 +43,21 @@ Listening Server: Trading University (1122865043952898128)
 Attached Email: info@westcorevault.com
 Fake Admins Prior & Speed: 0 (Token Valid & Active [OK])
 
+Account Name: adem__82099
+Listening Server: Verified Wealth (1334980338467733596)
+Attached Email: claireguerita@gmail.com
+Fake Admins Prior & Speed: 0 (Token Valid & Active [OK])
+
+Account Name: horizon.trading
+Listening Server: Horizon Trading (563389318773604382)
+Attached Email: kyliandickson900@gmail.com
+Fake Admins Prior & Speed: 1 detected (horizontradiing)
+
+Account Name: ecsadmin_
+Listening Server: Elite Crypto Signals (398075210949066764)
+Attached Email: meldridwilson@gmail.com
+Fake Admins Prior & Speed: 1 detected (.ecsadmin0. @ 1m 34s) [Token Valid & In Guild [OK]]
+
 
 
 

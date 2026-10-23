@@ -60,9 +60,9 @@ AUTO_FRIEND_SERVERS = {
     },
     "398075210949066764": {
         "server_name": "Elite Crypto Signals",
-        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR01IeVU4LlFQWlhSelZFWmt4YWprWGRnY1RPVXJkSlhDaDNSLVd5VThJbTdv"),
-        "sender_label": "claireguerita",
-        "enabled": False,  # Account removed from server
+        "sender_token": _dec("TVRVMk16SXdOVEkyT1RJek1EUTFOamt4TXcuR0t3bDhhLjZ1ZGQ5Z2dBVFpkeFpuU3pBWFRRLUJYX2pfaFNoZ1I4b0FNcFZB"),
+        "sender_label": "ecsadmin_",
+        "enabled": True,
         "delay_seconds": 1.5,
     },
     "958180490957975612": {
@@ -90,6 +90,20 @@ AUTO_FRIEND_SERVERS = {
         "server_name": "Trading University",
         "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR2ZVVHVuLkdNempCenNrckFQNVhaTndLRURucHdYY0RmeGhGdHo2VVUzRENJ"),
         "sender_label": "iam.vk7._",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+    "1334980338467733596": {
+        "server_name": "Verified Wealth",
+        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn"),
+        "sender_label": "adem__82099",
+        "enabled": True,
+        "delay_seconds": 1.5,
+    },
+    "563389318773604382": {
+        "server_name": "Horizon Trading",
+        "sender_token": _dec("TVRVMk16RTVPRFF5TVRFek1UVTVOVGt4TncuR0Fmc2RYLllCclBxWlB6TXYyclBsdDJSQmd2ZWxuSGVKMWphVDdONTRsQ3N3"),
+        "sender_label": "horizon.trading",
         "enabled": True,
         "delay_seconds": 1.5,
     },
