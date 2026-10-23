@@ -16,12 +16,12 @@ Fake Admins Prior & Speed: 0
 Account Name: nicliu___
 Listening Server: PASE (1330889066425749576)
 Attached Email: nicliu236@gmail.com
-Fake Admins Prior & Speed: 0
+Fake Admins Prior & Speed: 0 (Token Refreshed & Active [OK])
 
 Account Name: claireguerita
-Listening Server: Elite Crypto Signals (398075210949066764)
+Listening Server: None (Removed from Elite Crypto Signals 398075210949066764 by moderators)
 Attached Email: claireguerita@gmail.com
-Fake Admins Prior & Speed: 1 (.ecsadmin0. @ 1m 34s)
+Fake Admins Prior & Speed: 1 (.ecsadmin0. @ 1m 34s) - [ACCOUNT INACTIVE / KICKED]
 
 Account Name: talon.1977._
 Listening Server: Underground Trading Company (958180490957975612)

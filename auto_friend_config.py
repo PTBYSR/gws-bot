@@ -53,7 +53,7 @@ AUTO_FRIEND_SERVERS = {
     },
     "1330889066425749576": {
         "server_name": "PASE",
-        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuRzk4dnVKLlVJWlN6UVBOVFgtblZQbHVQQXl2cU8tUEZWaEMzWUhfMXY5U1A0"),
+        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuR0RCU3NtLjFQSEt6S2RsMk1ldWhzaUx1SVFwMGFnVVMtQkpnVlo2QkFyeWV3"),
         "sender_label": "nicliu___",
         "enabled": True,
         "delay_seconds": 1.5,
@@ -62,7 +62,7 @@ AUTO_FRIEND_SERVERS = {
         "server_name": "Elite Crypto Signals",
         "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR01IeVU4LlFQWlhSelZFWmt4YWprWGRnY1RPVXJkSlhDaDNSLVd5VThJbTdv"),
         "sender_label": "claireguerita",
-        "enabled": True,
+        "enabled": False,  # Account removed from server
         "delay_seconds": 1.5,
     },
     "958180490957975612": {
