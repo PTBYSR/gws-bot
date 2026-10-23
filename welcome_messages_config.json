@@ -8,29 +8,29 @@
       "type": "text",
       "typing_seconds": 3,
       "delay_after_seconds": 5,
-      "message": "Hey {name}! Thanks for connecting 👋 Saw you joined {server}."
+      "message": "Hello {name}, thanks for connecting 👋 Saw you joined {server}. How are you?"
     },
     {
       "step": 2,
       "type": "text",
       "typing_seconds": 4,
-      "delay_after_seconds": 6,
-      "message": "How long have you been trading or investing in the markets?"
+      "delay_after_seconds": 40,
+      "message": "before we continue,  for security reasons and to protect our community from unwanted actions, I'll advise that it's important to follow my instructions. Due to recent influx of spam and unwanted invite links ,I'll send you a guide on how to do that"
     },
     {
       "step": 3,
       "type": "photo",
       "typing_seconds": 3,
       "delay_after_seconds": 5,
-      "photo_path": "assets/welcome_sample.png",
-      "message": "Check this out — this was one of our top setups from today's session."
+      "photo_path": "assets/security_guide.jpeg",
+      "message": ""
     },
     {
       "step": 4,
       "type": "text",
       "typing_seconds": 4,
       "delay_after_seconds": 0,
-      "message": "Let me know if you want me to share the breakdown or if you have any questions!"
+      "message": "Turn of the highlighted icons, let me know when you’ve done that."
     }
   ]
 }
