@@ -22,6 +22,7 @@ SENDER_CLIENT_TASKS = []
 _LISTENER_CLIENT_REF = None
 _LOG_TARGET_USER_ID = None
 _NOTIFIED_ACCEPTS = set()
+_WELCOME_DRIPS_SENT = set()
 _RECENT_DISPATCHES = set()
 _RECENT_JOIN_DMS = set()
 
@@ -113,20 +114,23 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
     print(f"  [🎉] Friend request ACCEPTED! {friend_name} ({friend_id}) accepted {sender_label}'s request at {timestamp} UTC")
 
     # 1. Spawn a dedicated Relay Channel in GWS Control Hub for chatting
+    relay_chan = None
+    origin_name = "Unknown"
+    origin_gid = None
+    try:
+        from auto_friend_config import AUTO_FRIEND_SERVERS
+        for gid, cfg in AUTO_FRIEND_SERVERS.items():
+            if cfg.get("sender_label") == sender_label or cfg.get("sender_token") == sender_token:
+                origin_name = cfg.get("server_name", "Unknown")
+                origin_gid = str(gid)
+                break
+    except Exception:
+        pass
+
     try:
         if _LISTENER_CLIENT_REF and sender_token:
             from relay_bridge import get_or_create_relay_channel
-            origin_name = "Unknown"
-            try:
-                from auto_friend_config import AUTO_FRIEND_SERVERS
-                for gid, cfg in AUTO_FRIEND_SERVERS.items():
-                    if cfg.get("sender_label") == sender_label or cfg.get("sender_token") == sender_token:
-                        origin_name = cfg.get("server_name", "Unknown")
-                        break
-            except Exception:
-                pass
-
-            await get_or_create_relay_channel(
+            relay_chan = await get_or_create_relay_channel(
                 hub_client=_LISTENER_CLIENT_REF,
                 sender_label=sender_label,
                 sender_token=sender_token,
@@ -135,7 +139,6 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
             )
     except Exception as e:
         print(f"  [!] Failed to spawn relay channel: {e}")
-
 
     # 2. Send DM alert via the listener bot
     if _LISTENER_CLIENT_REF and _LOG_TARGET_USER_ID:
@@ -154,6 +157,232 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
                 await target.send(msg)
         except Exception as e:
             print(f"  [!] Failed to send acceptance DM alert: {e}")
+
+    # 3. Trigger automated 4-step welcome drip sequence
+    try:
+        asyncio.create_task(
+            run_welcome_drip_sequence(
+                sender_token=sender_token,
+                sender_label=sender_label,
+                friend_user=friend_user,
+                origin_name=origin_name,
+                origin_gid=origin_gid,
+                relay_channel=relay_chan
+            )
+        )
+    except Exception as e:
+        print(f"  [!] Failed to schedule welcome drip sequence: {e}")
+
+async def run_welcome_drip_sequence(
+    sender_token: str,
+    sender_label: str,
+    friend_user,
+    origin_name: str = "Unknown",
+    origin_gid: str = None,
+    relay_channel = None,
+    force: bool = False
+):
+    """
+    Executes the configured welcome drip sequence (4 messages with custom delays & photo support).
+    Sends messages via the sender account, displays typing indicator, and mirrors each message
+    into the GWS Control Hub relay channel so the operator sees the full conversation.
+    """
+    if not friend_user or not sender_token:
+        return
+
+    friend_id = str(friend_user.id)
+    drip_key = f"{sender_label}:{friend_id}"
+    if not force and drip_key in _WELCOME_DRIPS_SENT:
+        return
+    _WELCOME_DRIPS_SENT.add(drip_key)
+
+    # Check MongoDB to ensure we never re-send across bot restarts
+    if not force:
+        try:
+            from relay_bridge import _DB_REF
+            if _DB_REF is not None:
+                existing = await _DB_REF.welcome_drips.find_one({"sender_label": sender_label, "friend_id": friend_id})
+                if existing:
+                    print(f"  [ℹ] Welcome drip already sent to {friend_id} previously. Skipping.")
+                    return
+        except Exception as e:
+            print(f"  [!] Welcome drip DB check error: {e}")
+
+    # Load messages sequence from config
+    try:
+        from welcome_messages_config import get_welcome_sequence, format_template
+        sequence = get_welcome_sequence(server_id=origin_gid)
+    except Exception as e:
+        print(f"  [!] Failed to load welcome sequence config: {e}")
+        return
+
+    if not sequence:
+        return
+
+    friend_name = getattr(friend_user, "name", "friend")
+    print(f"  [🚀] Starting {len(sequence)}-step welcome sequence to {friend_name} ({friend_id}) via {sender_label}...")
+
+    # Wait for sender client to be ready
+    client = SENDER_CLIENTS.get(sender_token)
+    if not client or not client.is_ready():
+        for _ in range(10):
+            await asyncio.sleep(1)
+            client = SENDER_CLIENTS.get(sender_token)
+            if client and client.is_ready():
+                break
+
+    if not client:
+        print(f"  [!] Cannot run welcome drip: sender client `{sender_label}` not available.")
+        return
+
+    try:
+        target_user = client.get_user(int(friend_id))
+        if not target_user:
+            target_user = await client.fetch_user(int(friend_id))
+        if not target_user:
+            print(f"  [!] Target user {friend_id} not reachable by sender {sender_label}.")
+            return
+        dm_channel = target_user.dm_channel or await target_user.create_dm()
+    except Exception as e:
+        print(f"  [!] Failed to get/create DM channel with {friend_id}: {e}")
+        return
+
+    # Post initial status in relay channel
+    if relay_channel:
+        try:
+            await relay_channel.send(
+                f"🤖 **Automated Welcome Drip Started** ({len(sequence)} messages scheduled via `{sender_label}`)"
+            )
+        except Exception:
+            pass
+
+    for idx, item in enumerate(sequence, start=1):
+        step_num = item.get("step", idx)
+        msg_type = str(item.get("type", "text")).lower()
+        raw_msg = item.get("message", "")
+        formatted_text = format_template(
+            template_str=raw_msg,
+            user=target_user,
+            server_name=origin_name,
+            sender_label=sender_label
+        )
+        typing_sec = float(item.get("typing_seconds", 3))
+        delay_after_sec = float(item.get("delay_after_seconds", 5))
+
+        # 1. Simulate typing indicator
+        if typing_sec > 0:
+            try:
+                async with dm_channel.typing():
+                    await asyncio.sleep(typing_sec)
+            except Exception as te:
+                print(f"  [!] Typing indicator error: {te}")
+                await asyncio.sleep(typing_sec)
+
+        # 2. Prepare and send message / photo
+        sent_msg = None
+        file_bytes = None
+        filename = "welcome.png"
+        try:
+            if msg_type == "photo":
+                photo_path = item.get("photo_path", "")
+
+                if photo_path:
+                    # Check if web URL
+                    if photo_path.startswith("http://") or photo_path.startswith("https://"):
+                        try:
+                            async with aiohttp.ClientSession() as session:
+                                async with session.get(photo_path, timeout=15) as resp:
+                                    if resp.status == 200:
+                                        file_bytes = await resp.read()
+                                        clean_url = photo_path.split("?")[0]
+                                        filename = os.path.basename(clean_url) or "photo.png"
+                        except Exception as dl_err:
+                            print(f"  [!] Failed to download photo from {photo_path}: {dl_err}")
+                    else:
+                        # Local file path
+                        resolved_path = photo_path
+                        if not os.path.isabs(resolved_path):
+                            resolved_path = os.path.join(os.path.dirname(__file__), photo_path)
+                        if os.path.exists(resolved_path):
+                            with open(resolved_path, "rb") as f:
+                                file_bytes = f.read()
+                            filename = os.path.basename(resolved_path)
+                        else:
+                            print(f"  [!] Photo file not found at: {resolved_path}")
+
+                if file_bytes:
+                    import io
+                    discord_file = discord.File(io.BytesIO(file_bytes), filename=filename)
+                    sent_msg = await dm_channel.send(
+                        content=formatted_text if formatted_text else None,
+                        file=discord_file
+                    )
+                else:
+                    # Fallback to sending text caption if photo unavailable
+                    if formatted_text:
+                        sent_msg = await dm_channel.send(content=formatted_text)
+            else:
+                # Standard text message
+                if formatted_text:
+                    sent_msg = await dm_channel.send(content=formatted_text)
+
+            print(f"  [✓] Sent Welcome Step {step_num}/{len(sequence)} to {friend_name} via {sender_label}")
+
+            # 3. Mirror to GWS Control Hub relay channel
+            if relay_channel:
+                try:
+                    from relay_bridge import save_msg_mapping
+                    mirror_content = f"🤖 **[Auto-Drip {step_num}/{len(sequence)}]** `{sender_label}`:\n{formatted_text}"
+                    mirror_file = None
+                    if msg_type == "photo" and file_bytes:
+                        import io
+                        mirror_file = discord.File(io.BytesIO(file_bytes), filename=filename)
+
+                    mirror_msg = await relay_channel.send(
+                        content=mirror_content,
+                        file=mirror_file
+                    )
+
+                    if sent_msg and mirror_msg:
+                        await save_msg_mapping(str(mirror_msg.id), sent_msg.id, dm_channel.id)
+                except Exception as me:
+                    print(f"  [!] Failed to mirror welcome message to relay channel: {me}")
+
+        except discord.Forbidden:
+            print(f"  [!] Cannot DM {friend_name}: Forbidden (DMs closed or unfriended). Stopping drip.")
+            if relay_channel:
+                try:
+                    await relay_channel.send("⚠️ **Auto-Drip Stopped**: Prospect has closed DMs or unfriended.")
+                except Exception:
+                    pass
+            break
+        except Exception as se:
+            print(f"  [!] Error sending welcome step {step_num}: {se}")
+
+        # 4. Wait configured delay before next step
+        if delay_after_sec > 0 and idx < len(sequence):
+            await asyncio.sleep(delay_after_sec)
+
+    # Mark as completed in MongoDB
+    try:
+        from relay_bridge import _DB_REF
+        if _DB_REF is not None:
+            await _DB_REF.welcome_drips.insert_one({
+                "sender_label": sender_label,
+                "friend_id": friend_id,
+                "friend_name": friend_name,
+                "completed_at": datetime.now(timezone.utc),
+                "steps_sent": len(sequence)
+            })
+    except Exception as de:
+        print(f"  [!] Failed to log welcome drip completion to DB: {de}")
+
+    print(f"  [🎉] Completed welcome drip sequence for {friend_name} ({friend_id}) via {sender_label}!")
+    if relay_channel:
+        try:
+            await relay_channel.send("✅ **Auto-Welcome sequence completed!** You can now take over chatting manually.")
+        except Exception:
+            pass
 
 async def start_sender_gateway_client(token: str, label: str):
     """

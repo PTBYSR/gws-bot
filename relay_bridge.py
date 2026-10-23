@@ -239,6 +239,7 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
             f"• **Replies**: Swipe or tap 'Reply' on any message (text or photo) to reply natively.\n"
             f"• **Photos**: Upload pictures from your camera roll — they are sent as native image files.\n"
             f"• **Mentions**: Type `@them`, `@user`, or `@{target_name}` to ping them in DM.\n"
+            f"• **Auto-Drip**: Type `!drip` or `!welcome` to trigger the automated 4-message welcome sequence.\n"
             f"*(A ✅ reaction confirms successful delivery).* "
         )
         await new_channel.send(banner)
@@ -283,6 +284,22 @@ async def handle_outbound_relay_message(message, sender_clients_map):
 
         if not target_user:
             await message.channel.send(f"❌ Could not find prospect user `{target_user_id}` on Discord.")
+            return True
+
+        # Check for manual drip test command
+        if message.content and message.content.strip().lower() in ("!drip", "!welcome"):
+            from auto_friend import run_welcome_drip_sequence
+            await message.add_reaction("⏳")
+            asyncio.create_task(
+                run_welcome_drip_sequence(
+                    sender_token=sender_token,
+                    sender_label=sender_label,
+                    friend_user=target_user,
+                    origin_name="Manual Trigger",
+                    relay_channel=message.channel,
+                    force=True
+                )
+            )
             return True
 
         # 1. Process Mentions (@them, @user, @prospect, @username -> <@id>)
