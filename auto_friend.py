@@ -175,6 +175,9 @@ async def start_sender_gateway_client(token: str, label: str):
     @client.event
     async def on_member_join(member):
         """Allows sender/listener account to detect joins directly on the servers it belongs to."""
+        guild_id = str(member.guild.id)
+        if guild_id not in AUTO_FRIEND_SERVERS or not AUTO_FRIEND_SERVERS[guild_id].get("enabled"):
+            return
         username_clean = f"{member.name}"
         if member.discriminator and member.discriminator != "0":
             username_clean += f"#{member.discriminator}"
