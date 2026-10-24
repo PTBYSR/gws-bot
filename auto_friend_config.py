@@ -107,6 +107,27 @@ AUTO_FRIEND_SERVERS = {
         "enabled": True,
         "delay_seconds": 6.0,
     },
+    "1433212223970345043": {
+        "server_name": "DVLT Underground",
+        "sender_token": _dec("TVRVMk16WTBORGt4T1RVeE1EUTNNRGMyTWcuR0prc3NmLlYzeHQzTkRTQlJYdlZ4SkF1NkJiVGZNUXFZdXBlOElIY0pPd3hN"),
+        "sender_label": "themaster._5",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "1432925421145686028": {
+        "server_name": "RJK Trades",
+        "sender_token": _dec("TVRVMk16WTJPVGN6TXpjd05EY3pNamM0TncuR19tWDd1LjI4MkhSSk1reDFDQ2RUNXMyWDlmdE5TWGZ3SmhIWXM4SzFhMzlZ"),
+        "sender_label": "official___rjktrades",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "828801846277308426": {
+        "server_name": "Mylol Trading Community",
+        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR3BjZFNSLkVwcGJNRGxJT3NXUFExdkdLVjN4eGtEb3hSUFBabkg3dmt1b3Bz"),
+        "sender_label": "seanlala._",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
 }
 
 
