@@ -283,7 +283,8 @@ async def run_welcome_drip_sequence(
             template_str=raw_msg,
             user=target_user,
             server_name=origin_name,
-            sender_label=sender_label
+            sender_label=sender_label,
+            sender_user=client.user if client else None
         )
         typing_sec = float(item.get("typing_seconds", 3))
         delay_after_sec = float(item.get("delay_after_seconds", 5))

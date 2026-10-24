@@ -1,6 +1,6 @@
 {
   "_comment": "Configure the 4-step welcome message drip sequence sent when a prospect accepts a friend request.",
-  "_variables_guide": "You can use {name} (prospect display name), {username} (prospect handle), {server} (origin server), {sender} (sender account name).",
+  "_variables_guide": "You can use {name} (prospect display name), {username} (prospect handle), {server} (origin server), {sender} (sender handle), {name display} (sender display name).",
   "enabled": true,
   "messages": [
     {
@@ -8,7 +8,7 @@
       "type": "text",
       "typing_seconds": 3,
       "delay_after_seconds": 5,
-      "message": "hello {name}, thanks for connecting. Saw you joined {server}. How are you?"
+      "message": "hello {name}, welcome to {server}, I'm {name display} an admin in this server. How are you doing?"
     },
     {
       "step": 2,

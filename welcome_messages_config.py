@@ -20,7 +20,7 @@ DEFAULT_MESSAGES = [
         "type": "text",
         "typing_seconds": 3,
         "delay_after_seconds": 5,
-        "message": "hello {name}, thanks for connecting. Saw you joined {server}."
+        "message": "hello {name}, welcome to {server}, I'm {name display} an admin in this server. How are you doing?"
     },
     {
         "step": 2,
@@ -94,8 +94,8 @@ def get_welcome_sequence(server_id: Optional[str] = None) -> List[Dict[str, Any]
     # Fall back to 'messages' or 'default_sequence'
     return cfg.get("messages") or cfg.get("default_sequence") or DEFAULT_MESSAGES
 
-def format_template(template_str: str, user=None, server_name: str = "the server", sender_label: str = "Support") -> str:
-    """Format string with dynamic variables like {name}, {username}, {server}, {sender}."""
+def format_template(template_str: str, user=None, server_name: str = "the server", sender_label: str = "Support", sender_user=None) -> str:
+    """Format string with dynamic variables like {name}, {username}, {server}, {sender}, {name display}."""
     if not template_str:
         return ""
 
@@ -103,16 +103,24 @@ def format_template(template_str: str, user=None, server_name: str = "the server
     username = "user"
     if user:
         # discord.User or Member
-        user_name = getattr(user, "display_name", None) or getattr(user, "name", "there")
+        user_name = getattr(user, "display_name", None) or getattr(user, "global_name", None) or getattr(user, "name", "there")
         username = getattr(user, "name", "user")
 
     clean_server = server_name if server_name and server_name != "Unknown" else "our community"
+
+    # Resolve sender display name (e.g. "Nic", "Master", "RJK Trades", "Sean")
+    sender_display = sender_label
+    if sender_user:
+        sender_display = getattr(sender_user, "display_name", None) or getattr(sender_user, "global_name", None) or getattr(sender_user, "name", sender_label)
 
     replacements = {
         "{name}": str(user_name),
         "{username}": str(username),
         "{server}": str(clean_server),
-        "{sender}": str(sender_label)
+        "{sender}": str(sender_label),
+        "{name display}": str(sender_display),
+        "{sender_display}": str(sender_display),
+        "{display_name}": str(sender_display)
     }
 
     result = template_str
