@@ -123,7 +123,7 @@ AUTO_FRIEND_SERVERS = {
     },
     "828801846277308426": {
         "server_name": "Mylol Trading Community",
-        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR3BjZFNSLkVwcGJNRGxJT3NXUFExdkdLVjN4eGtEb3hSUFBabkg3dmt1b3Bz"),
+        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR2NDd2JMLlllZ0pKZFc3LVprSC1oZ0NsbWFrNkJ0bUd3TEtOY3BHUVRNMlZV"),
         "sender_label": "seanlala._",
         "enabled": True,
         "delay_seconds": 6.0,
