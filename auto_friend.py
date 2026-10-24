@@ -140,21 +140,40 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
     except Exception as e:
         print(f"  [!] Failed to spawn relay channel: {e}")
 
-    # 2. Send DM alert via the listener bot
-    if _LISTENER_CLIENT_REF and _LOG_TARGET_USER_ID:
+    # 2. Send DM alert via the listener bot + 5-Buzz Burst Notification
+    target_uid = _LOG_TARGET_USER_ID or os.environ.get("LOG_TARGET_USER_ID", "1551356562142928968")
+    if _LISTENER_CLIENT_REF and target_uid:
         try:
-            target = _LISTENER_CLIENT_REF.get_user(int(_LOG_TARGET_USER_ID))
+            target = _LISTENER_CLIENT_REF.get_user(int(target_uid))
             if not target:
-                target = await _LISTENER_CLIENT_REF.fetch_user(int(_LOG_TARGET_USER_ID))
+                target = await _LISTENER_CLIENT_REF.fetch_user(int(target_uid))
             if target:
+                from relay_bridge import HUB_SERVER_ID, trigger_buzz_burst
+                link_text = ""
+                if relay_chan:
+                    chan_url = f"https://discord.com/channels/{HUB_SERVER_ID}/{relay_chan.id}"
+                    link_text = f"\n🔗 **Direct Chat**: <#{relay_chan.id}> ([Open Channel]({chan_url}))"
+
                 msg = (
                     f"🎉 **Friend Request Accepted!**\n"
                     f"• **Accepted By**: `{friend_name}` (`{friend_id}`)\n"
                     f"• **Sender Account**: `{sender_label}`\n"
-                    f"• **Timestamp**: `{timestamp} UTC`\n"
+                    f"• **Origin Server**: `{origin_name}`\n"
+                    f"• **Timestamp**: `{timestamp} UTC`{link_text}\n"
                     f"💬 *A dedicated chat channel was created in GWS Control for you to DM them!*"
                 )
                 await target.send(msg)
+
+                # Option B: Fire 5-buzz burst notifications (auto-cleaned after 60s)
+                asyncio.create_task(
+                    trigger_buzz_burst(
+                        client=_LISTENER_CLIENT_REF,
+                        target_user_id=target_uid,
+                        count=5,
+                        delay=0.4,
+                        auto_delete_after=60
+                    )
+                )
         except Exception as e:
             print(f"  [!] Failed to send acceptance DM alert: {e}")
 

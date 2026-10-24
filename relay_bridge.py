@@ -21,6 +21,102 @@ from datetime import datetime, timezone
 
 # GWS Control Hub Server ID
 HUB_SERVER_ID = "1561888167936659528"
+LOG_TARGET_USER_ID = os.environ.get("LOG_TARGET_USER_ID", "1551356562142928968")
+
+# In-memory debounce map for inbound buzzes: target_user_id -> last_timestamp
+_RECENT_INBOUND_BUZZ = {}
+
+async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 5, delay: float = 0.4, auto_delete_after: int = 60):
+    """
+    Sends a rapid burst of empty notifications (\\u200b) to trigger consecutive
+    vibrations/chimes on the operator's mobile device, then auto-deletes them after
+    the specified duration (Option B) to keep the DM clean.
+    """
+    if not client:
+        return
+
+    uid = str(target_user_id or LOG_TARGET_USER_ID or "1551356562142928968").strip()
+    if not uid:
+        return
+
+    try:
+        target = client.get_user(int(uid))
+        if not target:
+            target = await client.fetch_user(int(uid))
+        if not target:
+            print(f"  [!] Buzz Burst: Could not resolve operator user {uid}")
+            return
+
+        sent_pings = []
+        for i in range(count):
+            await asyncio.sleep(delay)
+            try:
+                ping_msg = await target.send("\u200b")
+                sent_pings.append(ping_msg)
+            except Exception as pe:
+                print(f"  [!] Failed to send burst ping #{i+1}: {pe}")
+
+        print(f"  [⚡] Dispatched {len(sent_pings)} buzz burst notifications to {uid}")
+
+        # Option B: Auto-delete empty pings after specified seconds
+        if auto_delete_after > 0 and sent_pings:
+            async def _cleanup():
+                await asyncio.sleep(auto_delete_after)
+                deleted = 0
+                for msg in sent_pings:
+                    try:
+                        await msg.delete()
+                        deleted += 1
+                        await asyncio.sleep(0.2)
+                    except Exception:
+                        pass
+                print(f"  [🧹] Auto-cleaned {deleted}/{len(sent_pings)} buzz burst notifications.")
+
+            asyncio.create_task(_cleanup())
+
+    except Exception as e:
+        print(f"  [!] Failed to execute buzz burst for {uid}: {e}")
+
+async def notify_inbound_reply(hub_client, sender_label: str, sender_name: str, target_user_id: int, content: str, channel):
+    """
+    Sends a DM alert to the operator with message preview + direct link when a prospect replies,
+    and triggers a 5-buzz burst notification (debounced by 15s to avoid duplicate bursts if typing fast).
+    """
+    if not hub_client:
+        return
+
+    uid = str(LOG_TARGET_USER_ID or "1551356562142928968").strip()
+    now_ts = asyncio.get_event_loop().time()
+    last_ts = _RECENT_INBOUND_BUZZ.get(target_user_id, 0)
+
+    try:
+        target = hub_client.get_user(int(uid))
+        if not target:
+            target = await hub_client.fetch_user(int(uid))
+        if target:
+            chan_link = f"https://discord.com/channels/{HUB_SERVER_ID}/{channel.id}"
+            preview = (content[:250] + "...") if len(content) > 250 else (content or "[Sent a photo / attachment]")
+            alert_msg = (
+                f"💬 **New Reply from `{sender_name}`** (`{sender_label}` thread)!\n"
+                f"> {preview}\n"
+                f"🔗 **Chat Here**: <#{channel.id}> ([Open Channel]({chan_link}))"
+            )
+            await target.send(alert_msg)
+
+            # Trigger 5-buzz burst if not buzzed for this prospect in the last 15 seconds
+            if now_ts - last_ts > 15:
+                _RECENT_INBOUND_BUZZ[target_user_id] = now_ts
+                asyncio.create_task(
+                    trigger_buzz_burst(
+                        client=hub_client,
+                        target_user_id=uid,
+                        count=5,
+                        delay=0.4,
+                        auto_delete_after=60
+                    )
+                )
+    except Exception as e:
+        print(f"  [!] Failed to send inbound DM alert: {e}")
 
 # In-memory channel mappings:
 # CHANNEL_ID -> {"target_user_id": str, "target_name": str, "sender_label": str, "sender_token": str}
@@ -227,8 +323,9 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
 
         # Send introductory banner
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        mention_prefix = f"<@{LOG_TARGET_USER_ID}> " if LOG_TARGET_USER_ID else ""
         banner = (
-            f"🎉 **Live Relay Bridge Active!**\n"
+            f"🎉 {mention_prefix}**Live Relay Bridge Active!**\n"
             f"• **Prospect**: `{target_name}` (`{target_id_str}`)\n"
             f"• **Sender Account**: `{sender_label}`\n"
             f"• **Origin Server**: `{origin_server_name}`\n"
@@ -437,6 +534,18 @@ async def handle_inbound_dm(sender_label: str, sender_token: str, dm_message, hu
             await save_msg_mapping(str(sent_hub_msg.id), dm_message.id, dm_message.channel.id)
 
         print(f"  [←] Inbound Relay: Mirrored DM from {sender_name} to #{channel.name}")
+
+        # 4. Notify Operator in DM + 5-Buzz Burst Notification (Option B: auto-clean after 60s)
+        asyncio.create_task(
+            notify_inbound_reply(
+                hub_client=hub_client,
+                sender_label=sender_label,
+                sender_name=sender_name,
+                target_user_id=dm_message.author.id,
+                content=content,
+                channel=channel
+            )
+        )
 
 async def handle_outbound_relay_edit(before, after, sender_clients_map):
     """
