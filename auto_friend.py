@@ -346,6 +346,13 @@ async def run_welcome_drip_sequence(
                 if formatted_text:
                     sent_msg = await dm_channel.send(content=formatted_text)
 
+            if sent_msg:
+                try:
+                    from relay_bridge import register_automated_drip_msg_id
+                    register_automated_drip_msg_id(sent_msg.id)
+                except Exception:
+                    pass
+
             print(f"  [✓] Sent Welcome Step {step_num}/{len(sequence)} to {friend_name} via {sender_label}")
 
             # 3. Mirror to GWS Control Hub relay channel
@@ -441,9 +448,11 @@ async def start_sender_gateway_client(token: str, label: str):
     @client.event
     async def on_message(message):
         """Relay inbound DMs from prospects to the GWS Control Hub channel."""
-        if message.guild is None and message.author.id != client.user.id:
+        if message.guild is None and message.author.id != client.user.id and not message.author.bot:
             try:
-                from relay_bridge import handle_inbound_dm
+                from relay_bridge import handle_inbound_dm, is_automated_welcome_message, _AUTOMATED_DRIP_MSG_IDS
+                if message.id in _AUTOMATED_DRIP_MSG_IDS or is_automated_welcome_message(message.content):
+                    return
                 if _LISTENER_CLIENT_REF:
                     await handle_inbound_dm(
                         sender_label=label,

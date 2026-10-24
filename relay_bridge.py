@@ -26,6 +26,30 @@ LOG_TARGET_USER_ID = os.environ.get("LOG_TARGET_USER_ID", "1551356562142928968")
 # In-memory debounce map for inbound buzzes: target_user_id -> last_timestamp
 _RECENT_INBOUND_BUZZ = {}
 
+# Set of automated welcome drip message IDs to ensure they NEVER trigger 5-buzz inbound alerts
+_AUTOMATED_DRIP_MSG_IDS = set()
+
+def register_automated_drip_msg_id(msg_id: int):
+    """Tracks message IDs sent by automated welcome drips so they are never treated as inbound replies."""
+    _AUTOMATED_DRIP_MSG_IDS.add(int(msg_id))
+
+def is_automated_welcome_message(content: str) -> bool:
+    """Checks if message content matches automated welcome drip text."""
+    if not content:
+        return False
+    phrases = [
+        "admin in this server",
+        "how are you doing",
+        "thanks for connecting",
+        "before we continue,  for security reasons",
+        "before we continue, for security reasons",
+        "protect our community from unwanted actions",
+        "turn of the highlighted icons",
+        "turn off the highlighted icons"
+    ]
+    clow = content.lower()
+    return any(p in clow for p in phrases)
+
 async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 5, delay: float = 0.8, auto_delete_after: int = 60):
     """
     Sends a rapid burst of notifications (.) to trigger consecutive
@@ -468,12 +492,12 @@ async def handle_outbound_relay_message(message, sender_clients_map):
         return True
 
 async def handle_inbound_dm(sender_label: str, sender_token: str, dm_message, hub_client):
-    """
-    Called when a prospect DMs one of your sender accounts.
-    Mirrors their message into their assigned channel in GWS Control with:
-    - Real picture/file uploads
-    - Native replies linked if they replied to your DM
-    """
+    # 0. Never process inbound DMs if the author is a bot, or if it is an automated welcome message
+    if dm_message.author.bot:
+        return
+    if dm_message.id in _AUTOMATED_DRIP_MSG_IDS or is_automated_welcome_message(dm_message.content):
+        return
+
     # Find or create channel
     channel = await get_or_create_relay_channel(
         hub_client=hub_client,
