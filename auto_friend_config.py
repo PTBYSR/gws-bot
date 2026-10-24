@@ -53,7 +53,7 @@ AUTO_FRIEND_SERVERS = {
     },
     "1330889066425749576": {
         "server_name": "PASE",
-        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuR0RCU3NtLjFQSEt6S2RsMk1ldWhzaUx1SVFwMGFnVVMtQkpnVlo2QkFyeWV3"),
+        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuRzNSZUltLm5rZUN0VkRqeHFRZTE1M2VfUGhoUklrd0VybjRXNHhQenQ1QVNV"),
         "sender_label": "nicliu___",
         "enabled": True,
         "delay_seconds": 6.0,
