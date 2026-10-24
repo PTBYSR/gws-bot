@@ -8,7 +8,7 @@
       "type": "text",
       "typing_seconds": 3,
       "delay_after_seconds": 5,
-      "message": "Hello {name}, thanks for connecting 👋 Saw you joined {server}. How are you?"
+      "message": "hello {name}, thanks for connecting. Saw you joined {server}. How are you?"
     },
     {
       "step": 2,

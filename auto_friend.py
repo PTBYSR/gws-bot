@@ -170,7 +170,7 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
                         client=_LISTENER_CLIENT_REF,
                         target_user_id=target_uid,
                         count=5,
-                        delay=0.4,
+                        delay=0.8,
                         auto_delete_after=60
                     )
                 )

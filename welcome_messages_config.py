@@ -20,7 +20,7 @@ DEFAULT_MESSAGES = [
         "type": "text",
         "typing_seconds": 3,
         "delay_after_seconds": 5,
-        "message": "Hey {name}! Thanks for connecting 👋 Saw you joined {server}."
+        "message": "hello {name}, thanks for connecting. Saw you joined {server}."
     },
     {
         "step": 2,

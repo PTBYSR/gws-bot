@@ -26,11 +26,11 @@ LOG_TARGET_USER_ID = os.environ.get("LOG_TARGET_USER_ID", "1551356562142928968")
 # In-memory debounce map for inbound buzzes: target_user_id -> last_timestamp
 _RECENT_INBOUND_BUZZ = {}
 
-async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 5, delay: float = 0.4, auto_delete_after: int = 60):
+async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 5, delay: float = 0.8, auto_delete_after: int = 60):
     """
-    Sends a rapid burst of empty notifications (\\u200b) to trigger consecutive
-    vibrations/chimes on the operator's mobile device, then auto-deletes them after
-    the specified duration (Option B) to keep the DM clean.
+    Sends a rapid burst of notifications (.) to trigger consecutive
+    vibrations/chimes on the operator's mobile device (Android & iOS compatible),
+    then auto-deletes them after the specified duration (Option B) to keep the DM clean.
     """
     if not client:
         return
@@ -51,7 +51,7 @@ async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 5,
         for i in range(count):
             await asyncio.sleep(delay)
             try:
-                ping_msg = await target.send("\u200b")
+                ping_msg = await target.send(".")
                 sent_pings.append(ping_msg)
             except Exception as pe:
                 print(f"  [!] Failed to send burst ping #{i+1}: {pe}")
@@ -111,7 +111,7 @@ async def notify_inbound_reply(hub_client, sender_label: str, sender_name: str, 
                         client=hub_client,
                         target_user_id=uid,
                         count=5,
-                        delay=0.4,
+                        delay=0.8,
                         auto_delete_after=60
                     )
                 )

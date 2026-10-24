@@ -14,6 +14,9 @@
 | **`adem__82099`** | **Verified Wealth** (`1334980338467733596`) | `claireguerita@gmail.com` | **0** *(Token Active & Profile Updated [OK])* |
 | **`horizon.trading`** | **Horizon Trading** (`563389318773604382`) | `kyliandickson900@gmail.com` | **1 fake admin** (`horizontradiing`) |
 | **`ecsadmin_`** | **Elite Crypto Signals** (`398075210949066764`) | `meldridwilson@gmail.com` | **1 fake admin** (`.ecsadmin0.` @ **1m 34s**) *(Token Active & In Guild [OK])* |
+| **`themaster._5`** | **DVLT Underground** (`1433212223970345043`) | `samuelderrick081@gmail.com` | **0** *(Token Active & In Guild [OK])* |
+| **`official___rjktrades`** | **RJK Trades** (`1432925421145686028`) | `albertflemming000@gmail.com` | **0** *(Token Active & In Guild [OK])* |
+| **`seanlala._`** | **Mylol Trading Community** (`828801846277308426`) | `samuelbankz2144@gmail.com` | **0** *(Token Active & In Guild [OK])* |
 
 
 
