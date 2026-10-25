@@ -33,7 +33,7 @@ def set_listener_ref(listener_client, log_target_user_id: str):
     _LOG_TARGET_USER_ID = log_target_user_id
 
 async def send_join_alert_dm(member, username_clean: str, listener_client, log_target_user_id: str):
-    """Send the standard New Join DM alert to the designated user from gateway listener."""
+    """Send a short New Join DM alert to the designated user from gateway listener."""
     if not listener_client or not log_target_user_id:
         return
 
@@ -42,58 +42,15 @@ async def send_join_alert_dm(member, username_clean: str, listener_client, log_t
         return
     _RECENT_JOIN_DMS.add(dedup_key)
 
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-    log_entry = f"[{timestamp}] `{username_clean}` joined `{member.guild.name}`"
-    print(log_entry)
-
-    # Save to local log file
-    try:
-        logs_dir = os.path.join(os.path.dirname(__file__), "logs")
-        os.makedirs(logs_dir, exist_ok=True)
-        with open(os.path.join(logs_dir, "joins.log"), "a", encoding="utf-8") as f:
-            f.write(log_entry + "\n")
-    except Exception as e:
-        print(f"  [!] Failed to write to log file: {e}")
-
-    # Save to MongoDB
-    try:
-        from relay_bridge import _DB_REF
-        if _DB_REF is not None:
-            await _DB_REF.joins.insert_one({
-                "user_id": str(member.id),
-                "username": username_clean,
-                "guild_id": str(member.guild.id),
-                "guild_name": member.guild.name,
-                "joined_at": member.joined_at or datetime.now(timezone.utc),
-                "logged_at": datetime.now(timezone.utc),
-                "timestamp_str": timestamp,
-                "source": "gateway_listener"
-            })
-    except Exception as e:
-        print(f"  [!] Failed to save join to MongoDB: {e}")
-
-    # Send DM to specified user
     try:
         target_user = (
             listener_client.get_user(int(log_target_user_id))
             or await listener_client.fetch_user(int(log_target_user_id))
         )
         if target_user:
-            creation_date = "Unknown"
-            if member.created_at:
-                d = member.created_at
-                suffix = 'th' if 11 <= d.day <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d.day % 10, 'th')
-                creation_date = f"{d.day}{suffix} {d.strftime('%B %Y')}"
-
-            dm_message = (
-                f"**New Join**\n"
-                f"• User: `{username_clean}`\n"
-                f"• ID: `{member.id}`\n"
-                f"• Created: `{creation_date}`\n"
-                f"• Server: `{member.guild.name}`"
-            )
+            dm_message = f"📥 `{username_clean}` • {member.guild.name}"
             await target_user.send(dm_message)
-            print(f"  [✓] DM alert successfully sent to {log_target_user_id} for `{username_clean}`")
+            print(f"  [✓] DM alert sent for `{username_clean}`")
     except Exception as e:
         print(f"  [!] Failed to send join DM to {log_target_user_id}: {e}")
 
@@ -140,7 +97,7 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
     except Exception as e:
         print(f"  [!] Failed to spawn relay channel: {e}")
 
-    # 2. Send DM alert via the listener bot + 5-Buzz Burst Notification
+    # 2. Send short DM alert via the listener bot + gentle 2-buzz notification
     target_uid = _LOG_TARGET_USER_ID or os.environ.get("LOG_TARGET_USER_ID", "1551356562142928968")
     if _LISTENER_CLIENT_REF and target_uid:
         try:
@@ -148,30 +105,19 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
             if not target:
                 target = await _LISTENER_CLIENT_REF.fetch_user(int(target_uid))
             if target:
-                from relay_bridge import HUB_SERVER_ID, trigger_buzz_burst
-                link_text = ""
-                if relay_chan:
-                    chan_url = f"https://discord.com/channels/{HUB_SERVER_ID}/{relay_chan.id}"
-                    link_text = f"\n🔗 **Direct Chat**: <#{relay_chan.id}> ([Open Channel]({chan_url}))"
-
-                msg = (
-                    f"🎉 **Friend Request Accepted!**\n"
-                    f"• **Accepted By**: `{friend_name}` (`{friend_id}`)\n"
-                    f"• **Sender Account**: `{sender_label}`\n"
-                    f"• **Origin Server**: `{origin_name}`\n"
-                    f"• **Timestamp**: `{timestamp} UTC`{link_text}\n"
-                    f"💬 *A dedicated chat channel was created in GWS Control for you to DM them!*"
-                )
+                from relay_bridge import trigger_buzz_burst
+                chan_ref = f" ➜ <#{relay_chan.id}>" if relay_chan else ""
+                msg = f"🎉 **{friend_name}** added you • {origin_name}{chan_ref}"
                 await target.send(msg)
 
-                # Option B: Fire 5-buzz burst notifications (auto-cleaned after 60s)
+                # Gentle 2-buzz notification (auto-cleaned after 20s)
                 asyncio.create_task(
                     trigger_buzz_burst(
                         client=_LISTENER_CLIENT_REF,
                         target_user_id=target_uid,
-                        count=5,
+                        count=2,
                         delay=0.8,
-                        auto_delete_after=60
+                        auto_delete_after=20
                     )
                 )
         except Exception as e:
@@ -626,27 +572,13 @@ async def dispatch_auto_friend(member, username_clean: str, listener_client, log
             if target_user:
                 sender_label = result.get("sender_label", "Sender")
                 if result.get("success"):
-                    msg = (
-                        f"🤝 **Auto-Friend Request Sent! (Gateway)**\n"
-                        f"• Sender: `{sender_label}`\n"
-                        f"• Target: `{username_clean}` (`{member.id}`)\n"
-                        f"• Server: `{member.guild.name}`"
-                    )
+                    msg = f"🤝 Added `{username_clean}` • {member.guild.name}"
                     await target_user.send(msg)
                 elif result.get("captcha_required"):
-                    msg = (
-                        f"⚠️ **Auto-Friend Blocked (Captcha Required)**\n"
-                        f"• Sender: `{sender_label}`\n"
-                        f"• Target: `{username_clean}`\n"
-                        f"• Status: Discord requested hCaptcha verification. Token preserved."
-                    )
+                    msg = f"⚠️ Captcha required on `{sender_label}` for `{username_clean}`"
                     await target_user.send(msg)
                 elif result.get("invalid_token"):
-                    msg = (
-                        f"❌ **Auto-Friend Token Expired (401)**\n"
-                        f"• Sender: `{sender_label}`\n"
-                        f"• Status: Token was rotated or invalidated. Please update with active token."
-                    )
+                    msg = f"❌ Token expired on `{sender_label}`"
                     await target_user.send(msg)
         except Exception as e:
             print(f"  [!] Failed to send auto-friend DM notification: {e}")

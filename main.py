@@ -153,8 +153,8 @@ client = discord.Client()
 from auto_friend import _RECENT_JOIN_DMS
 
 async def send_dm_alert(member, username_clean, is_recovery=False):
-    """Send a DM alert about a new member join."""
-    if not LOG_TARGET_USER_ID:
+    """Send a short DM alert about a new member join."""
+    if not LOG_TARGET_USER_ID or is_recovery:
         return
 
     # Deduplicate join DMs to avoid repeated alerts for the same join
@@ -169,28 +169,9 @@ async def send_dm_alert(member, username_clean, is_recovery=False):
             or await client.fetch_user(int(LOG_TARGET_USER_ID))
         )
         if target_user:
-            creation_date = "Unknown"
-            if member.created_at:
-                d = member.created_at
-                suffix = 'th' if 11 <= d.day <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d.day % 10, 'th')
-                creation_date = f"{d.day}{suffix} {d.strftime('%B %Y')}"
-
-            # Indicate if this was a recovered (missed) join
-            header = "**âš ï¸ Missed Join (While Offline)**" if is_recovery else "**New Join**"
-
-            dm_message = (
-                f"{header}\n"
-                f"â€¢ User: `{username_clean}`\n"
-                f"â€¢ ID: `{member.id}`\n"
-                f"â€¢ Created: `{creation_date}`\n"
-                f"â€¢ Server: `{member.guild.name}`"
-            )
-            if is_recovery and member.joined_at:
-                dm_message += f"\nâ€¢ Joined At: `{member.joined_at.strftime('%Y-%m-%d %H:%M:%S')} UTC`"
-
+            dm_message = f"📥 `{username_clean}` • {member.guild.name}"
             await target_user.send(dm_message)
-            tag = "recovery DM" if is_recovery else "DM alert"
-            print(f"  [âœ“] {tag} successfully sent to {LOG_TARGET_USER_ID}")
+            print(f"  [✓] DM alert sent for `{username_clean}`")
     except Exception as e:
         print(f"  [!] Failed to send DM to {LOG_TARGET_USER_ID}: {e}")
 
@@ -341,20 +322,26 @@ async def recover_missed_joins():
                 except Exception:
                     pass
 
-                # Send DM alert
-                await send_dm_alert(member, username_clean, is_recovery=True)
-                # Send WhatsApp alert (paused)
-                # await send_whatsapp_alert(member, username_clean, is_recovery=True)
                 recovered_count += 1
 
                 # Small delay to avoid rate limits
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.5)
 
         except Exception as e:
             print(f"  [!] Error recovering joins for {guild.name}: {e}")
 
     if recovered_count > 0:
-        print(f"  [âœ“] Recovered {recovered_count} missed join(s)")
+        print(f"  [✓] Recovered {recovered_count} missed join(s)")
+        if LOG_TARGET_USER_ID:
+            try:
+                target_user = (
+                    client.get_user(int(LOG_TARGET_USER_ID))
+                    or await client.fetch_user(int(LOG_TARGET_USER_ID))
+                )
+                if target_user:
+                    await target_user.send(f"🔄 Recovered **{recovered_count}** missed join(s).")
+            except Exception:
+                pass
     else:
         print(f"  [~] No missed joins to recover")
 

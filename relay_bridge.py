@@ -50,7 +50,7 @@ def is_automated_welcome_message(content: str) -> bool:
     clow = content.lower()
     return any(p in clow for p in phrases)
 
-async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 5, delay: float = 0.8, auto_delete_after: int = 60):
+async def trigger_buzz_burst(client, target_user_id: str = None, count: int = 2, delay: float = 0.6, auto_delete_after: int = 20):
     """
     Sends a rapid burst of notifications (.) to trigger consecutive
     vibrations/chimes on the operator's mobile device (Android & iOS compatible),
@@ -118,25 +118,20 @@ async def notify_inbound_reply(hub_client, sender_label: str, sender_name: str, 
         if not target:
             target = await hub_client.fetch_user(int(uid))
         if target:
-            chan_link = f"https://discord.com/channels/{HUB_SERVER_ID}/{channel.id}"
-            preview = (content[:250] + "...") if len(content) > 250 else (content or "[Sent a photo / attachment]")
-            alert_msg = (
-                f"💬 **New Reply from `{sender_name}`** (`{sender_label}` thread)!\n"
-                f"> {preview}\n"
-                f"🔗 **Chat Here**: <#{channel.id}> ([Open Channel]({chan_link}))"
-            )
+            preview = (content[:120] + "...") if len(content) > 120 else (content or "[Attachment]")
+            alert_msg = f"💬 **{sender_name}**: {preview} ➜ <#{channel.id}>"
             await target.send(alert_msg)
 
-            # Trigger 5-buzz burst if not buzzed for this prospect in the last 15 seconds
+            # Trigger 2-buzz burst if not buzzed for this prospect in the last 15 seconds
             if now_ts - last_ts > 15:
                 _RECENT_INBOUND_BUZZ[target_user_id] = now_ts
                 asyncio.create_task(
                     trigger_buzz_burst(
                         client=hub_client,
                         target_user_id=uid,
-                        count=5,
-                        delay=0.8,
-                        auto_delete_after=60
+                        count=2,
+                        delay=0.6,
+                        auto_delete_after=20
                     )
                 )
     except Exception as e:
