@@ -58,33 +58,12 @@ AUTO_FRIEND_SERVERS = {
         "enabled": True,
         "delay_seconds": 6.0,
     },
-    "398075210949066764": {
-        "server_name": "Elite Crypto Signals",
-        "sender_token": _dec("TVRVMk16SXdOVEkyT1RJek1EUTFOamt4TXcuR0t3bDhhLjZ1ZGQ5Z2dBVFpkeFpuU3pBWFRRLUJYX2pfaFNoZ1I4b0FNcFZB"),
-        "sender_label": "ecsadmin_",
-        "enabled": True,
-        "delay_seconds": 8.0,
-    },
     "958180490957975612": {
         "server_name": "Underground Trading Company",
         "sender_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr"),
         "sender_label": "talon.1977._",
         "enabled": True,
         "delay_seconds": 6.0,
-    },
-    "774685007780380683": {
-        "server_name": "Team Alpha Trading",
-        "sender_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv"),
-        "sender_label": "brendan.guastaferro._",
-        "enabled": True,
-        "delay_seconds": 12.0,
-    },
-    "964204570840539166": {
-        "server_name": "Stock Market Chat",
-        "sender_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0"),
-        "sender_label": "rhu.wan",
-        "enabled": True,
-        "delay_seconds": 10.0,
     },
     "1122865043952898128": {
         "server_name": "Trading University",

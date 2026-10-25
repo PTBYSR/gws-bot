@@ -1,64 +1,83 @@
+=======================================================
+ACCOUNT LISTENERS REPORT
+=======================================================
+
+--- ACTIVE ACCOUNT LISTENERS (10 SERVERS + CENTRAL) ---
+
 Account Name: king_arthur0001
 Listening Server: All Guilds (Central Listener) + GWS Control
 Attached Email: kingarthur166289@gmail.com
-Fake Admins Prior & Speed: 9 total across 5 servers (Elite Crypto Signals: 1 [.ecsadmin0. @ 1m 34s], LuxAlgo: 3 [smack.09 @ 1m 24s, _ssmack. @ 2m 55s, jacobdembreez9 @ 13m 34s], KAIZEN: 1 [kinqjung. @ 2m 40s], Horizon Trading: 1 [hyrottomas @ 5m 00s], AO Trading: 3 [.garfus_112748 @ 2m 00s, metadonprofitz_ @ 3m 30s, andreoutberg1.])
+Status: ACTIVE [OK]
 
 Account Name: allen.warfield.
 Listening Server: Cryptex Commonwealth (329712211989889026)
 Attached Email: georgemorcos.live1@gmail.com
-Fake Admins Prior & Speed: 0
+Status: ACTIVE [OK]
 
 Account Name: coins.ph_hdawg.
 Listening Server: Coins Community (974604371860021289)
 Attached Email: rams.eytn.wdeborah1955@gmail.com
-Fake Admins Prior & Speed: 0
+Status: ACTIVE [OK]
 
 Account Name: nicliu___
 Listening Server: PASE (1330889066425749576)
 Attached Email: nicliu236@gmail.com
-Fake Admins Prior & Speed: 0 (Token Refreshed & Active [OK])
-
-Account Name: claireguerita
-Listening Server: None (Removed from Elite Crypto Signals 398075210949066764 by moderators)
-Attached Email: claireguerita@gmail.com
-Fake Admins Prior & Speed: 1 (.ecsadmin0. @ 1m 34s) - [ACCOUNT INACTIVE / KICKED]
+Status: ACTIVE [OK] (Token Refreshed & Active)
 
 Account Name: talon.1977._
 Listening Server: Underground Trading Company (958180490957975612)
 Attached Email: pasetechnologies@gmail.com
-Fake Admins Prior & Speed: 0 (Token Valid & Active)
-
-Account Name: brendan.guastaferro._
-Listening Server: Team Alpha Trading (774685007780380683)
-Attached Email: alvinmaduka@gmail.com
-Fake Admins Prior & Speed: 2 detected (brendanguastaferro728, brendanguastaferroor)
-
-Account Name: rhu.wan
-Listening Server: Stock Market Chat (964204570840539166)
-Attached Email: info@murdochvault.com
-Fake Admins Prior & Speed: 2 detected (stonkmaster345, stonkmaster04182)
+Status: ACTIVE [OK] (Token Valid & Active)
 
 Account Name: iam.vk7._
 Listening Server: Trading University (1122865043952898128)
 Attached Email: info@westcorevault.com
-Fake Admins Prior & Speed: 0 (Token Valid & Active [OK])
+Status: ACTIVE [OK] (Token Valid & Active)
 
 Account Name: adem__82099
 Listening Server: Verified Wealth (1334980338467733596)
 Attached Email: claireguerita@gmail.com
-Fake Admins Prior & Speed: 0 (Token Valid & Active [OK])
+Status: ACTIVE [OK] (Token Valid & Active)
 
 Account Name: horizon.trading
 Listening Server: Horizon Trading (563389318773604382)
 Attached Email: kyliandickson900@gmail.com
-Fake Admins Prior & Speed: 1 detected (horizontradiing)
+Status: ACTIVE [OK] (Token Valid & Active)
+
+Account Name: themaster._5
+Listening Server: DVLT Underground (1433212223970345043)
+Attached Email: samuelderrick081@gmail.com
+Status: ACTIVE [OK] (Token Valid & Active)
+
+Account Name: official___rjktrades
+Listening Server: RJK Trades (1432925421145686028)
+Attached Email: albertflemming000@gmail.com
+Status: ACTIVE [OK] (Token Valid & Active)
+
+Account Name: seanlala._
+Listening Server: Mylol Trading Community (828801846277308426)
+Attached Email: samuelbankz2144@gmail.com
+Status: ACTIVE [OK] (Token Valid & Active)
+
+
+--- REMOVED / INACTIVE ACCOUNTS ---
+
+Account Name: brendan.guastaferro._
+Listening Server: None (Removed from Team Alpha Trading 774685007780380683)
+Attached Email: alvinmaduka@gmail.com
+Status: INACTIVE / REMOVED
+
+Account Name: rhu.wan
+Listening Server: None (Removed from Stock Market Chat 964204570840539166)
+Attached Email: info@murdochvault.com
+Status: INACTIVE / REMOVED
 
 Account Name: ecsadmin_
-Listening Server: Elite Crypto Signals (398075210949066764)
+Listening Server: None (Removed from Elite Crypto Signals 398075210949066764)
 Attached Email: meldridwilson@gmail.com
-Fake Admins Prior & Speed: 1 detected (.ecsadmin0. @ 1m 34s) [Token Valid & In Guild [OK]]
+Status: INACTIVE / REMOVED
 
-
-
-
-
+Account Name: claireguerita
+Listening Server: None (Removed from Elite Crypto Signals 398075210949066764)
+Attached Email: claireguerita@gmail.com
+Status: INACTIVE / REMOVED
