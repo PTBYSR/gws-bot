@@ -1,83 +1,94 @@
-=======================================================
-ACCOUNT LISTENERS REPORT
-=======================================================
+================================================================================
+ACCOUNT LISTENERS REPORT (LIVE AUDIT: OCT 26, 2026)
+================================================================================
 
---- ACTIVE ACCOUNT LISTENERS (10 SERVERS + CENTRAL) ---
-
-Account Name: king_arthur0001
-Listening Server: All Guilds (Central Listener) + GWS Control
-Attached Email: kingarthur166289@gmail.com
-Status: ACTIVE [OK]
+--- 1. ACTIVELY LISTENING & VERIFIED INSIDE TARGET SERVERS (5 ACCOUNTS) ---
 
 Account Name: allen.warfield.
 Listening Server: Cryptex Commonwealth (329712211989889026)
 Attached Email: georgemorcos.live1@gmail.com
-Status: ACTIVE [OK]
+Status: ACTIVE [OK] (Present in server & Gateway listener running)
 
 Account Name: coins.ph_hdawg.
 Listening Server: Coins Community (974604371860021289)
 Attached Email: rams.eytn.wdeborah1955@gmail.com
-Status: ACTIVE [OK]
-
-Account Name: nicliu___
-Listening Server: PASE (1330889066425749576)
-Attached Email: nicliu236@gmail.com
-Status: ACTIVE [OK] (Token Refreshed & Active)
+Status: ACTIVE [OK] (Present in server & Gateway listener running)
 
 Account Name: talon.1977._
 Listening Server: Underground Trading Company (958180490957975612)
 Attached Email: pasetechnologies@gmail.com
-Status: ACTIVE [OK] (Token Valid & Active)
-
-Account Name: iam.vk7._
-Listening Server: Trading University (1122865043952898128)
-Attached Email: info@westcorevault.com
-Status: ACTIVE [OK] (Token Valid & Active)
-
-Account Name: adem__82099
-Listening Server: Verified Wealth (1334980338467733596)
-Attached Email: claireguerita@gmail.com
-Status: ACTIVE [OK] (Token Valid & Active)
-
-Account Name: horizon.trading
-Listening Server: Horizon Trading (563389318773604382)
-Attached Email: kyliandickson900@gmail.com
-Status: ACTIVE [OK] (Token Valid & Active)
+Status: ACTIVE [OK] (Present in server & Gateway listener running)
 
 Account Name: themaster._5
 Listening Server: DVLT Underground (1433212223970345043)
 Attached Email: samuelderrick081@gmail.com
-Status: ACTIVE [OK] (Token Valid & Active)
+Status: ACTIVE [OK] (Present in server & Gateway listener running)
 
 Account Name: official___rjktrades
 Listening Server: RJK Trades (1432925421145686028)
 Attached Email: albertflemming000@gmail.com
-Status: ACTIVE [OK] (Token Valid & Active)
-
-Account Name: seanlala._
-Listening Server: Mylol Trading Community (828801846277308426)
-Attached Email: samuelbankz2144@gmail.com
-Status: ACTIVE [OK] (Token Valid & Active)
+Status: ACTIVE [OK] (Present in server & Gateway listener running)
 
 
---- REMOVED / INACTIVE ACCOUNTS ---
+--- 2. NOT INSIDE ASSIGNED TARGET SERVER (2 ACCOUNTS) ---
+
+Account Name: adem__82099
+Assigned Server: Verified Wealth (1334980338467733596)
+Attached Email: claireguerita@gmail.com
+Status: NOT IN SERVER (Token is valid; present in DIAM, Particle, Cloudlines, Warden; NOT in Verified Wealth)
+
+Account Name: horizon.trading
+Assigned Server: Horizon Trading (563389318773604382)
+Attached Email: kyliandickson900@gmail.com
+Status: NOT IN SERVER (Token is valid; only present in PASE; kicked or left Horizon Trading)
+
+
+--- 3. ALL FREE ACCOUNTS READY FOR LISTENING (5 ACCOUNTS WITH VALID TOKENS) ---
 
 Account Name: brendan.guastaferro._
-Listening Server: None (Removed from Team Alpha Trading 774685007780380683)
+User ID: 1562908916608663595
 Attached Email: alvinmaduka@gmail.com
-Status: INACTIVE / REMOVED
+Status: FREE & READY (Token Valid; freed from Team Alpha Trading)
 
 Account Name: rhu.wan
-Listening Server: None (Removed from Stock Market Chat 964204570840539166)
+User ID: 1562929054519394407
 Attached Email: info@murdochvault.com
-Status: INACTIVE / REMOVED
+Status: FREE & READY (Token Valid; freed from Stock Market Chat)
 
 Account Name: ecsadmin_
-Listening Server: None (Removed from Elite Crypto Signals 398075210949066764)
+User ID: 1563205269230456913
 Attached Email: meldridwilson@gmail.com
-Status: INACTIVE / REMOVED
+Status: FREE & READY (Token Valid; freed from Elite Crypto Signals)
+
+Account Name: adem__82099
+User ID: 1010108600443740220
+Attached Email: claireguerita@gmail.com
+Status: FREE & READY (Token Valid; available for new server assignment)
+
+Account Name: horizon.trading
+User ID: 1563198421131595917
+Attached Email: kyliandickson900@gmail.com
+Status: FREE & READY (Token Valid; available for new server assignment)
+
+
+--- 4. EXPIRED TOKENS REQUIRING REFRESH (HTTP 401) ---
+
+Account Name: nicliu___
+Assigned Server: PASE (1330889066425749576)
+Attached Email: nicliu236@gmail.com
+Status: TOKEN ERROR 401 (Needs fresh token)
+
+Account Name: iam.vk7._
+Assigned Server: Trading University (1122865043952898128)
+Attached Email: info@westcorevault.com
+Status: TOKEN ERROR 401 (Needs fresh token)
+
+Account Name: seanlala._
+Assigned Server: Mylol Trading Community (828801846277308426)
+Attached Email: samuelbankz2144@gmail.com
+Status: TOKEN ERROR 401 (Needs fresh token)
 
 Account Name: claireguerita
-Listening Server: None (Removed from Elite Crypto Signals 398075210949066764)
+Assigned Server: None
 Attached Email: claireguerita@gmail.com
-Status: INACTIVE / REMOVED
+Status: INACTIVE (Kicked / Removed)

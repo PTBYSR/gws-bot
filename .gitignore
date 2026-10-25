@@ -3,5 +3,6 @@ logs/
 __pycache__/
 whatsapp/node_modules/
 servers_config.json
+archived_servers.json
 scratch/
 
