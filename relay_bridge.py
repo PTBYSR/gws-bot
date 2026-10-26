@@ -15,6 +15,7 @@ Bridges DMs between target prospects and your private 'GWS Control' server:
 import os
 import re
 import json
+import time
 import asyncio
 import discord
 from datetime import datetime, timezone
@@ -265,6 +266,56 @@ def process_outbound_mentions(content: str, target_user_id: str, target_name: st
     regex = re.compile(rf"@({pattern_names})\b", re.IGNORECASE)
     return regex.sub(f"<@{target_user_id}>", content)
 
+# Debounce map to prevent Discord rate limits on channel reordering: channel_id -> last_bump_timestamp
+_LAST_BUMP_TIMESTAMPS = {}
+
+async def bump_channel_to_top(channel: discord.TextChannel, bump_category: bool = True):
+    """
+    Bumps the channel to the very top of its category (WhatsApp-style recent activity arrangement).
+    Also optionally moves the sender category to the top of all categories.
+    Includes a 15-second debounce per channel to protect against Discord API rate limits.
+    """
+    if not channel or not isinstance(channel, discord.TextChannel):
+        return
+
+    now = time.time()
+    last_bump = _LAST_BUMP_TIMESTAMPS.get(channel.id, 0)
+    if now - last_bump < 15:
+        return
+
+    _LAST_BUMP_TIMESTAMPS[channel.id] = now
+
+    try:
+        category = channel.category
+        if category:
+            cat_channels = [c for c in category.channels if isinstance(c, discord.TextChannel)]
+            cat_channels.sort(key=lambda c: c.position)
+
+            # Only call Discord API if not already at the top of the category
+            if cat_channels and cat_channels[0].id != channel.id:
+                top_pos = cat_channels[0].position
+                await channel.edit(position=top_pos)
+                print(f"  [↑] WhatsApp Flow: Bumped #{channel.name} to top of '{category.name}'")
+        else:
+            if channel.position > 0:
+                await channel.edit(position=0)
+
+        # Optionally float the sender category to the top of the server as well
+        if bump_category and category and channel.guild:
+            categories = sorted(channel.guild.categories, key=lambda c: c.position)
+            if categories and categories[0].id != category.id:
+                try:
+                    await category.edit(position=0)
+                except Exception:
+                    pass
+
+    except discord.Forbidden:
+        pass
+    except discord.HTTPException as e:
+        print(f"  [!] HTTP error while bumping #{channel.name}: {e}")
+    except Exception as e:
+        print(f"  [!] Failed to bump #{channel.name} to top: {e}")
+
 async def get_or_create_relay_channel(hub_client, sender_label: str, sender_token: str, target_user, origin_server_name: str = "Unknown"):
     """
     Finds existing relay channel for this target, or creates a new one under
@@ -360,6 +411,7 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
         )
         await new_channel.send(banner)
         print(f"  [+] Created Relay Channel: #{new_channel.name} ({new_channel.id}) in GWS Control Hub!")
+        asyncio.create_task(bump_channel_to_top(new_channel, bump_category=True))
         return new_channel
     except Exception as e:
         print(f"  [!] Failed to create relay channel for {target_name}: {e}")
@@ -475,6 +527,7 @@ async def handle_outbound_relay_message(message, sender_clients_map):
         # React with checkmark to confirm delivery to user on iPhone!
         await message.add_reaction("✅")
         print(f"  [→] Outbound Relay: Delivered message to {target_user.name} via {sender_label}")
+        asyncio.create_task(bump_channel_to_top(message.channel, bump_category=True))
         return True
 
     except discord.Forbidden:
@@ -553,6 +606,7 @@ async def handle_inbound_dm(sender_label: str, sender_token: str, dm_message, hu
             await save_msg_mapping(str(sent_hub_msg.id), dm_message.id, dm_message.channel.id)
 
         print(f"  [←] Inbound Relay: Mirrored DM from {sender_name} to #{channel.name}")
+        asyncio.create_task(bump_channel_to_top(channel, bump_category=True))
 
         # 4. Notify Operator in DM + 5-Buzz Burst Notification (Option B: auto-clean after 60s)
         asyncio.create_task(
