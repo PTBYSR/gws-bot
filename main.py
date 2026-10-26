@@ -618,14 +618,23 @@ async def handle_ping(request):
 async def start_dummy_server():
     try:
         app = web.Application()
-        app.router.add_get('/', handle_ping)
+        try:
+            from dashboard import setup_dashboard_routes, set_dashboard_refs
+            from auto_friend import SENDER_CLIENTS
+            set_dashboard_refs(db, client, SENDER_CLIENTS)
+            setup_dashboard_routes(app)
+        except Exception as de:
+            print(f"  [!] Note: Could not attach dashboard routes ({de}), using fallback ping.")
+            app.router.add_get('/', handle_ping)
+
         runner = web.AppRunner(app)
         await runner.setup()
         site = web.TCPSite(runner, '0.0.0.0', PORT)
         await site.start()
-        print(f"  [✓] Dummy web server running on port {PORT} (Render healthcheck)")
+        print(f"  [✓] Web server & Live Fleet Dashboard running on port {PORT} (Render)")
     except Exception as e:
-        print(f"  [!] Note: Dummy web server could not bind to port {PORT} ({e}). Bot will continue running.")
+        print(f"  [!] Note: Web server could not bind to port {PORT} ({e}). Bot will continue running.")
+
 
 # â”€â”€â”€ Main Runner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def main():
