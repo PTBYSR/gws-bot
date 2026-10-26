@@ -87,7 +87,7 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRVMk16WTJPVGN6TXpjd05EY3pNamM0TncuR19tWDd1LjI4MkhSSk1reDFDQ2RUNXMyWDlmdE5TWGZ3SmhIWXM4SzFhMzlZ")
     },
     {
-        "account": "brendan.guastaferro._",
+        "account": "shiny.wind.up.bird",
         "email": "alvinmaduka@gmail.com",
         "assigned_server": "Liquidity Theory",
         "guild_id": "1297957813644951613",
@@ -96,7 +96,7 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv")
     },
     {
-        "account": "rhu.wan",
+        "account": "breaking.chad",
         "email": "info@murdochvault.com",
         "assigned_server": "PAYTIENCE",
         "guild_id": "1306399620217438309",
@@ -105,7 +105,7 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0")
     },
     {
-        "account": "ecsadmin_",
+        "account": "n.o.a.h.9_",
         "email": "meldridwilson@gmail.com",
         "assigned_server": "Web-Based Wealth",
         "guild_id": "1069351223217635428",
@@ -418,10 +418,10 @@ async def build_fleet_payload():
             status_text = "🟢 Active (Central Hub)"
             status_code = "hub"
         elif batch == "Batch 1":
-            status_text = "🟢 Active (Batch 1)" if current_active_batch == "1" else "🟡 Configured (Batch 1)"
+            status_text = "🟢 Active (Batch 1)"
             status_code = "batch_1"
         elif batch == "Batch 2":
-            status_text = "🟢 Active (Batch 2)" if current_active_batch == "2" else "🟡 Configured (Batch 2)"
+            status_text = "🟢 Active (Batch 2)"
             status_code = "batch_2"
         elif batch == "Manual Add":
             status_text = "⚡ Manual Fast-Add"
