@@ -35,8 +35,8 @@ def _dec(v: str) -> str:
     return v
 
 # ── Primary In-Code Multi-Server Fleet Configuration ──
-# Change accounts/tokens directly here without needing to touch Render environment variables!
-AUTO_FRIEND_SERVERS = {
+# ── Batch 1 Fleet Configuration (Render Service 1: 5 Accounts) ──
+BATCH_1_SERVERS = {
     "329712211989889026": {
         "server_name": "Cryptex Commonwealth",
         "sender_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR1NXdmhJLlQycVJUR2dSRU14blQ4N0NvbTZEaFZGeUp4THBWQlpNeWlDXzBR"),
@@ -51,38 +51,10 @@ AUTO_FRIEND_SERVERS = {
         "enabled": True,
         "delay_seconds": 6.0,
     },
-    "1330889066425749576": {
-        "server_name": "PASE",
-        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuRzNSZUltLm5rZUN0VkRqeHFRZTE1M2VfUGhoUklrd0VybjRXNHhQenQ1QVNV"),
-        "sender_label": "nicliu___",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
     "958180490957975612": {
         "server_name": "Underground Trading Company",
         "sender_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr"),
         "sender_label": "talon.1977._",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
-    "1122865043952898128": {
-        "server_name": "Trading University",
-        "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR2ZVVHVuLkdNempCenNrckFQNVhaTndLRURucHdYY0RmeGhGdHo2VVUzRENJ"),
-        "sender_label": "iam.vk7._",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
-    "1334980338467733596": {
-        "server_name": "Verified Wealth",
-        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn"),
-        "sender_label": "adem__82099",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
-    "563389318773604382": {
-        "server_name": "Horizon Trading",
-        "sender_token": _dec("TVRVMk16RTVPRFF5TVRFek1UVTVOVGt4TncuR0Fmc2RYLllCclBxWlB6TXYyclBsdDJSQmd2ZWxuSGVKMWphVDdONTRsQ3N3"),
-        "sender_label": "horizon.trading",
         "enabled": True,
         "delay_seconds": 6.0,
     },
@@ -100,18 +72,66 @@ AUTO_FRIEND_SERVERS = {
         "enabled": True,
         "delay_seconds": 6.0,
     },
+}
+
+# ── Batch 2 Fleet Configuration (Render Service 2: 5 Accounts) ──
+BATCH_2_SERVERS = {
     "828801846277308426": {
         "server_name": "Mylol Trading Community",
-        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR2NDd2JMLlllZ0pKZFc3LVprSC1oZ0NsbWFrNkJ0bUd3TEtOY3BHUVRNMlZV"),
+        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR0hOaWhrLk5RM1NGNzhpU2xQZGxxcFFDQnVqQW50MlZvY3JMRkxjQ1FEVmVr"),
         "sender_label": "seanlala._",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "1122865043952898128": {
+        "server_name": "Trading University",
+        "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR1Nzbk5ZLk5uUHZ0Rm5ib0tUYjQ0c045Szh1MUcxOVJlZmRRUGlTeUplNHdV"),
+        "sender_label": "iam.vk7._",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "1330889066425749576": {
+        "server_name": "PASE",
+        "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuR1lKUVBkLkU1YWRxb1JXdGRtQ2FkX1pONDZvWUdGcVAzYmlmQU05Z2Nja1c0"),
+        "sender_label": "nicliu___",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "1334980338467733596": {
+        "server_name": "Verified Wealth",
+        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn"),
+        "sender_label": "adem__82099",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "563389318773604382": {
+        "server_name": "Horizon Trading",
+        "sender_token": _dec("TVRVMk16RTVPRFF5TVRFek1UVTVOVGt4TncuR0Fmc2RYLllCclBxWlB6TXYyclBsdDJSQmd2ZWxuSGVKMWphVDdONTRsQ3N3"),
+        "sender_label": "horizon.trading",
         "enabled": True,
         "delay_seconds": 6.0,
     },
 }
 
+# ── Dynamic Batch Selector ──
+# Render Service 1 sets SERVICE_BATCH=1 (default)
+# Render Service 2 sets SERVICE_BATCH=2
+SERVICE_BATCH = str(os.environ.get("SERVICE_BATCH", "1")).strip().lower()
 
-# Optional overrides from local servers_config.json (if present)
-if os.path.exists(JSON_CONFIG_PATH):
+if SERVICE_BATCH == "2":
+    AUTO_FRIEND_SERVERS = BATCH_2_SERVERS
+    print(f"[*] auto_friend_config: Loaded BATCH 2 ({len(AUTO_FRIEND_SERVERS)} servers configured)")
+elif SERVICE_BATCH in ("all", "0"):
+    AUTO_FRIEND_SERVERS = {**BATCH_1_SERVERS, **BATCH_2_SERVERS}
+    print(f"[*] auto_friend_config: Loaded ALL BATCHES ({len(AUTO_FRIEND_SERVERS)} servers configured)")
+else:
+    AUTO_FRIEND_SERVERS = BATCH_1_SERVERS
+    print(f"[*] auto_friend_config: Loaded BATCH 1 ({len(AUTO_FRIEND_SERVERS)} servers configured)")
+
+
+
+# Optional overrides from local servers_config.json (only if no explicit SERVICE_BATCH is set)
+if os.path.exists(JSON_CONFIG_PATH) and "SERVICE_BATCH" not in os.environ:
     try:
         with open(JSON_CONFIG_PATH, "r", encoding="utf-8") as f:
             json_servers = json.load(f)
@@ -120,3 +140,4 @@ if os.path.exists(JSON_CONFIG_PATH):
                     AUTO_FRIEND_SERVERS[str(guild_id)] = cfg
     except Exception as e:
         print(f"[!] Warning: Could not parse {JSON_CONFIG_PATH}: {e}")
+

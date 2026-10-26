@@ -604,30 +604,36 @@ async def start_dummy_server():
 
 # â”€â”€â”€ Main Runner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def main():
-    if not TOKEN:
-        print("[!] ERROR: DISCORD_TOKEN environment variable is not set.")
-        sys.exit(1)
-
     # 1. Connect to MongoDB
     await connect_mongo()
 
-    # 2. Start Dummy Web Server
+    # 2. Start Dummy Web Server (Render healthcheck)
     await start_dummy_server()
+
+    # 3. Start Auto-Friend Sender Gateway Clients (Solution B)
+    await init_all_sender_clients()
+
+    # 4. Start the main listener Discord client if configured
+    if not TOKEN:
+        batch_id = os.environ.get("SERVICE_BATCH", "1")
+        print(f"[*] No central DISCORD_TOKEN provided — running in Gateway Worker Mode for Batch {batch_id}.")
+        print("[✓] All sender clients and web healthcheck are actively running. Keeping alive...")
+        while True:
+            await asyncio.sleep(3600)
 
     # Pass listener client reference for friend request acceptance alerts
     if LOG_TARGET_USER_ID:
         set_listener_ref(client, LOG_TARGET_USER_ID)
 
-    # 3. Start Auto-Friend Sender Gateway Clients (Solution B)
-    await init_all_sender_clients()
-
-    # 4. Start the main listener Discord client
     try:
         await client.start(TOKEN)
     except discord.LoginFailure:
-        print("[!] Invalid token provided in DISCORD_TOKEN.")
+        print("[!] Invalid or expired token provided in DISCORD_TOKEN. Keeping worker clients alive...")
+        while True:
+            await asyncio.sleep(3600)
     except Exception as e:
         print(f"[!] An error occurred while running the client: {e}")
+
 
 if __name__ == "__main__":
     print("[*] Initializing gws-bot for Render deployment...\n")
