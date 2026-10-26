@@ -70,8 +70,7 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
 
     print(f"  [🎉] Friend request ACCEPTED! {friend_name} ({friend_id}) accepted {sender_label}'s request at {timestamp} UTC")
 
-    # 1. Spawn a dedicated Relay Channel in GWS Control Hub for chatting
-    relay_chan = None
+    # Resolve origin server info
     origin_name = "Unknown"
     origin_gid = None
     try:
@@ -83,6 +82,36 @@ async def notify_friend_accepted(sender_label: str, friend_user, sender_token: s
                 break
     except Exception:
         pass
+
+    # Log to persistent audit log
+    try:
+        log_dir = os.path.join(os.path.dirname(__file__), "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        with open(os.path.join(log_dir, "accepted_friends.log"), "a", encoding="utf-8") as af_log:
+            af_log.write(f"[{timestamp}] `{sender_label}` accepted by `{friend_name}` ({friend_id}) from `{origin_name}`\n")
+    except Exception:
+        pass
+
+    # Save to MongoDB
+    try:
+        from relay_bridge import _DB_REF
+        if _DB_REF is not None:
+            await _DB_REF.accepted_friends.update_one(
+                {"sender_label": sender_label, "friend_id": friend_id},
+                {"$set": {
+                    "sender_label": sender_label,
+                    "friend_id": friend_id,
+                    "friend_name": friend_name,
+                    "origin_server": origin_name,
+                    "accepted_at": datetime.now(timezone.utc)
+                }},
+                upsert=True
+            )
+    except Exception:
+        pass
+
+    # 1. Spawn a dedicated Relay Channel in GWS Control Hub for chatting
+    relay_chan = None
 
     try:
         if _LISTENER_CLIENT_REF and sender_token:
