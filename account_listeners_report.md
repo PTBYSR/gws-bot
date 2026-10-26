@@ -12,10 +12,10 @@
 | **`nicliu___`** | **PASE** | `1330889066425749576` | `nicliu236@gmail.com` | ❌ **TOKEN 401** — Unauthorized (needs fresh token) |
 | **`iam.vk7._`** | **Trading University** | `1122865043952898128` | `info@westcorevault.com` | ❌ **TOKEN 401** — Unauthorized (needs fresh token) |
 | **`seanlala._`** | **Mylol Trading Community** | `828801846277308426` | `samuelbankz2144@gmail.com` | ❌ **TOKEN 401** — Unauthorized (needs fresh token) |
-| **`brendan.guastaferro._`** | *None (Freed from Team Alpha)* | `774685007780380683` | `alvinmaduka@gmail.com` | 🟢 **FREE & READY** — Token valid, available for new server |
-| **`rhu.wan`** | *None (Freed from Stock Market Chat)* | `964204570840539166` | `info@murdochvault.com` | 🟢 **FREE & READY** — Token valid, available for new server |
-| **`ecsadmin_`** | *None (Freed from Elite Crypto Signals)* | `398075210949066764` | `meldridwilson@gmail.com` | 🟢 **FREE & READY** — Token valid, available for new server |
-| **`claireguerita`** | *None (Removed from Elite Crypto)* | `398075210949066764` | `claireguerita@gmail.com` | ⚪ **INACTIVE** — Account kicked from server |
+| **`brendan.guastaferro._`** | *None* | — | `alvinmaduka@gmail.com` | 🟢 **AVAILABLE FOR LISTENING** — Token valid, ready for assignment |
+| **`rhu.wan`** | *None* | — | `info@murdochvault.com` | 🟢 **AVAILABLE FOR LISTENING** — Token valid, ready for assignment |
+| **`ecsadmin_`** | *None* | — | `meldridwilson@gmail.com` | 🟢 **AVAILABLE FOR LISTENING** — Token valid, ready for assignment |
+| **`claireguerita`** | *None* | — | `claireguerita@gmail.com` | 🟢 **AVAILABLE FOR LISTENING** — Unassigned, ready for assignment |
 
 ---
 
@@ -29,12 +29,13 @@
 5. **`official___rjktrades`** ➜ RJK Trades (`1432925421145686028`)
 *(Plus **`king_arthur0001`** as central gateway listener).*
 
-### 2. Available Free Accounts Ready for Assignment (5 Accounts with Valid Tokens)
-1. **`brendan.guastaferro._`** (`alvinmaduka@gmail.com`) — Token 100% valid, freed from Team Alpha.
-2. **`rhu.wan`** (`info@murdochvault.com`) — Token 100% valid, freed from Stock Market Chat.
-3. **`ecsadmin_`** (`meldridwilson@gmail.com`) — Token 100% valid, freed from Elite Crypto Signals.
-4. **`adem__82099`** (`claireguerita@gmail.com`) — Token 100% valid, not in Verified Wealth; ready for reassignment.
-5. **`horizon.trading`** (`kyliandickson900@gmail.com`) — Token 100% valid, not in Horizon Trading; ready for reassignment.
+### 2. Available Accounts for Listening (Unassigned & Ready)
+1. **`brendan.guastaferro._`** (`alvinmaduka@gmail.com`) — Token 100% valid; ready to deploy.
+2. **`rhu.wan`** (`info@murdochvault.com`) — Token 100% valid; ready to deploy.
+3. **`ecsadmin_`** (`meldridwilson@gmail.com`) — Token 100% valid; ready to deploy.
+4. **`claireguerita`** (`claireguerita@gmail.com`) — Unassigned; ready to deploy.
+5. **`adem__82099`** (`claireguerita@gmail.com`) — Token 100% valid (not in Verified Wealth); ready for deployment.
+6. **`horizon.trading`** (`kyliandickson900@gmail.com`) — Token 100% valid (not in Horizon Trading); ready for deployment.
 
 ### 3. Missing from Assigned Target Server (2 Accounts)
 * **Verified Wealth** (`1334980338467733596`) ➜ **`adem__82099`** is NOT in this server.

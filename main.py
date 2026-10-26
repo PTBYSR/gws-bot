@@ -25,6 +25,23 @@ WHATSAPP_MONITOR_URL = os.environ.get("WHATSAPP_MONITOR_URL", "http://localhost:
 TARGET_SERVERS_STR = os.environ.get("TARGET_SERVERS", os.environ.get("TARGET_SERVERS_", ""))
 TARGET_SERVERS = [s.strip() for s in TARGET_SERVERS_STR.split(",") if s.strip()]
 
+# Servers requiring fast manual friend requests (e.g. servers without account listeners)
+MANUAL_FAST_SERVERS_STR = os.environ.get("MANUAL_FAST_SERVERS", "")
+MANUAL_FAST_SERVERS = set(s.strip() for s in MANUAL_FAST_SERVERS_STR.split(",") if s.strip())
+MANUAL_SERVERS_FILE = os.path.join(os.path.dirname(__file__), "manual_servers.json")
+if os.path.exists(MANUAL_SERVERS_FILE):
+    try:
+        with open(MANUAL_SERVERS_FILE, "r", encoding="utf-8") as f:
+            ms_data = json.load(f)
+            if isinstance(ms_data, dict):
+                for k in ms_data.keys():
+                    if not k.startswith("_"):
+                        MANUAL_FAST_SERVERS.add(str(k).strip())
+            elif isinstance(ms_data, list):
+                MANUAL_FAST_SERVERS.update(str(x).strip() for x in ms_data)
+    except Exception as e:
+        print(f"  [!] Note: Could not load manual_servers.json: {e}")
+
 # Create logs directory locally (ephemeral on Render free tier)
 LOGS_DIR = os.path.join(os.path.dirname(__file__), "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -153,7 +170,7 @@ client = discord.Client()
 from auto_friend import _RECENT_JOIN_DMS
 
 async def send_dm_alert(member, username_clean, is_recovery=False):
-    """Send a short DM alert about a new member join."""
+    """Send a DM alert about a new member join."""
     if not LOG_TARGET_USER_ID or is_recovery:
         return
 
@@ -163,15 +180,41 @@ async def send_dm_alert(member, username_clean, is_recovery=False):
         return
     _RECENT_JOIN_DMS.add(dedup_key)
 
+    is_manual_fast = str(member.guild.id) in MANUAL_FAST_SERVERS
+
     try:
         target_user = (
             client.get_user(int(LOG_TARGET_USER_ID))
             or await client.fetch_user(int(LOG_TARGET_USER_ID))
         )
         if target_user:
-            dm_message = f"📥 `{username_clean}` • {member.guild.name}"
-            await target_user.send(dm_message)
-            print(f"  [✓] DM alert sent for `{username_clean}`")
+            if is_manual_fast:
+                # Obvious fast manual add notification with 1-tap profile link
+                dm_message = (
+                    f"⚡ **FAST ADD**: `{username_clean}` in **{member.guild.name}**\n"
+                    f"👉 https://discord.com/users/{member.id}"
+                )
+                await target_user.send(dm_message)
+                print(f"  [⚡] FAST MANUAL ADD alert sent for `{username_clean}` in {member.guild.name}")
+
+                # Gentle 2-buzz notification burst so operator notices immediately
+                try:
+                    from relay_bridge import trigger_buzz_burst
+                    asyncio.create_task(
+                        trigger_buzz_burst(
+                            client=client,
+                            target_user_id=LOG_TARGET_USER_ID,
+                            count=2,
+                            delay=0.6,
+                            auto_delete_after=20
+                        )
+                    )
+                except Exception:
+                    pass
+            else:
+                dm_message = f"📥 `{username_clean}` • {member.guild.name}"
+                await target_user.send(dm_message)
+                print(f"  [✓] DM alert sent for `{username_clean}`")
     except Exception as e:
         print(f"  [!] Failed to send DM to {LOG_TARGET_USER_ID}: {e}")
 

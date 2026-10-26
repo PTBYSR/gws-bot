@@ -43,32 +43,36 @@ Attached Email: kyliandickson900@gmail.com
 Status: NOT IN SERVER (Token is valid; only present in PASE; kicked or left Horizon Trading)
 
 
---- 3. ALL FREE ACCOUNTS READY FOR LISTENING (5 ACCOUNTS WITH VALID TOKENS) ---
+--- 3. ALL AVAILABLE ACCOUNTS FOR LISTENING (UNASSIGNED & READY) ---
 
 Account Name: brendan.guastaferro._
 User ID: 1562908916608663595
 Attached Email: alvinmaduka@gmail.com
-Status: FREE & READY (Token Valid; freed from Team Alpha Trading)
+Status: AVAILABLE FOR LISTENING (Token Valid; unassigned)
 
 Account Name: rhu.wan
 User ID: 1562929054519394407
 Attached Email: info@murdochvault.com
-Status: FREE & READY (Token Valid; freed from Stock Market Chat)
+Status: AVAILABLE FOR LISTENING (Token Valid; unassigned)
 
 Account Name: ecsadmin_
 User ID: 1563205269230456913
 Attached Email: meldridwilson@gmail.com
-Status: FREE & READY (Token Valid; freed from Elite Crypto Signals)
+Status: AVAILABLE FOR LISTENING (Token Valid; unassigned, completely clear of ECS)
+
+Account Name: claireguerita
+Attached Email: claireguerita@gmail.com
+Status: AVAILABLE FOR LISTENING (Unassigned, completely clear of ECS)
 
 Account Name: adem__82099
 User ID: 1010108600443740220
 Attached Email: claireguerita@gmail.com
-Status: FREE & READY (Token Valid; available for new server assignment)
+Status: AVAILABLE FOR LISTENING (Token Valid; free to reassign to another server)
 
 Account Name: horizon.trading
 User ID: 1563198421131595917
 Attached Email: kyliandickson900@gmail.com
-Status: FREE & READY (Token Valid; available for new server assignment)
+Status: AVAILABLE FOR LISTENING (Token Valid; free to reassign to another server)
 
 
 --- 4. EXPIRED TOKENS REQUIRING REFRESH (HTTP 401) ---
@@ -87,8 +91,3 @@ Account Name: seanlala._
 Assigned Server: Mylol Trading Community (828801846277308426)
 Attached Email: samuelbankz2144@gmail.com
 Status: TOKEN ERROR 401 (Needs fresh token)
-
-Account Name: claireguerita
-Assigned Server: None
-Attached Email: claireguerita@gmail.com
-Status: INACTIVE (Kicked / Removed)
