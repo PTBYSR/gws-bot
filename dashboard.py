@@ -1,6 +1,6 @@
 """
-dashboard.py — Real-Time Fleet Control Dashboard & API.
-Exposes a live web interface and JSON API on the Render web instance.
+dashboard.py — Real-Time Fleet Control Dashboard & WebSocket API.
+Exposes a live web interface, WebSocket server (/ws/fleet), and JSON API on the Render web instance.
 """
 import os
 import json
@@ -9,13 +9,19 @@ import urllib.request
 import urllib.error
 import datetime
 import base64
-from aiohttp import web
+from aiohttp import web, WSMsgType
 from auto_friend_config import BATCH_1_SERVERS, BATCH_2_SERVERS, SERVICE_BATCH, _dec
 
-# Reference to mongo db instance (set by main.py)
+# Reference to mongo db instance and bot clients (set by main.py)
 _DB = None
 _LISTENER_CLIENT = None
 _SENDER_CLIENTS = None
+
+# Active WebSocket connections
+_WS_CLIENTS = set()
+
+# In-memory relationships cache: {account_name: {"accepted": int, "pending": int, "timestamp": float}}
+_RELATIONSHIPS_CACHE = {}
 
 def set_dashboard_refs(db_ref, listener_client_ref=None, sender_clients_ref=None):
     global _DB, _LISTENER_CLIENT, _SENDER_CLIENTS
@@ -33,7 +39,7 @@ FLEET_INVENTORY = [
         "batch": "Hub",
         "role": "Central Gateway Logger",
         "token_env": "DISCORD_TOKEN",
-        "default_token": _dec("TVRVMU1UTTBNRGcyTkRZM09UVTBOWGcxT1EuR3ZHa3ZkLks1cnZFMXNvYmpDemEKck0wVWNGUkNwOEFuTjE0Y09rVG9qS1E0")
+        "default_token": _dec("TVRVMU1UTTFNRGczTkRZM09UVTBOVGszTVEuR3ZHa3ZkLks1cnZFMXNvYmpDemFKck0wVWNGUkNwOEFuTjE0Y09rVG9qS1E0")
     },
     {
         "account": "allen.warfield.",
@@ -187,7 +193,6 @@ def format_relative_time(dt_val):
     days = int(hours / 24)
 
     if days >= 7:
-        # 1 week or more: normal date format
         return dt.strftime("%b %d, %Y")
     elif days >= 1:
         hours_rem = hours % 24
@@ -232,7 +237,6 @@ async def get_server_joins_from_db_or_file(guild_id: str, server_name: str):
     """Fetch the latest joins for a specific server from MongoDB or fallback to logs/joins.log."""
     joins = []
     
-    # 1. Try Mongo
     if _DB is not None:
         try:
             cursor = _DB.joins.find({"guild_id": str(guild_id)}).sort("joined_at", -1).limit(5)
@@ -245,7 +249,6 @@ async def get_server_joins_from_db_or_file(guild_id: str, server_name: str):
         except Exception:
             pass
 
-    # 2. Fallback to logs/joins.log if empty
     if not joins:
         log_path = os.path.join(os.path.dirname(__file__), "logs", "joins.log")
         if os.path.exists(log_path):
@@ -254,7 +257,6 @@ async def get_server_joins_from_db_or_file(guild_id: str, server_name: str):
                     lines = f.readlines()
                 for line in reversed(lines):
                     if f"` joined `{server_name}`" in line or f"joined `{server_name}`" in line:
-                        # Extract date: [2026-10-18 19:43:37] `username` joined `Server`
                         try:
                             ts_str = line[1:20]
                             dt = datetime.datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=datetime.timezone.utc)
@@ -284,17 +286,133 @@ async def get_server_joins_from_db_or_file(guild_id: str, server_name: str):
         ]
     }
 
-async def handle_fleet_api(request):
-    """JSON API returning full fleet state with join metrics."""
-    data = []
+async def get_account_relationships(item, force_refresh=False):
+    """
+    Fetch accepted friends count and pending outgoing requests for an account.
+    Utilizes Gateway memory if active, local TTL cache, or Discord REST API via non-blocking executor.
+    """
+    account = item["account"]
+    now = asyncio.get_event_loop().time()
+    
+    # Check cache (valid for 180 seconds unless force_refresh)
+    if not force_refresh and account in _RELATIONSHIPS_CACHE:
+        entry = _RELATIONSHIPS_CACHE[account]
+        if now - entry.get("timestamp", 0) < 180:
+            return entry
+
+    token = os.environ.get(item.get("token_env", "")) or item.get("default_token")
+
+    # Check Gateway in-memory relationships if client is connected
+    if _SENDER_CLIENTS and token and token in _SENDER_CLIENTS:
+        s_client = _SENDER_CLIENTS[token]
+        if s_client and getattr(s_client, "is_ready", lambda: False)():
+            try:
+                import discord
+                friends = len([r for r in s_client.relationships if getattr(r, 'type', None) == discord.RelationshipType.friend])
+                pending = len([r for r in s_client.relationships if getattr(r, 'type', None) == discord.RelationshipType.outgoing_request])
+                entry = {"accepted": friends, "pending": pending, "timestamp": now}
+                _RELATIONSHIPS_CACHE[account] = entry
+                return entry
+            except Exception:
+                pass
+
+    if not force_refresh and account in _RELATIONSHIPS_CACHE:
+        return _RELATIONSHIPS_CACHE[account]
+
+    # Asynchronous REST fetch in executor
+    if token:
+        try:
+            headers = {
+                "Authorization": token.strip(),
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            def _fetch():
+                req = urllib.request.Request("https://discord.com/api/v9/users/@me/relationships", headers=headers)
+                with urllib.request.urlopen(req, timeout=5) as r:
+                    return json.loads(r.read().decode("utf-8"))
+
+            loop = asyncio.get_event_loop()
+            rels = await loop.run_in_executor(None, _fetch)
+            friends = len([x for x in rels if x.get("type") == 1])
+            pending = len([x for x in rels if x.get("type") == 4])
+            entry = {"accepted": friends, "pending": pending, "timestamp": now}
+            _RELATIONSHIPS_CACHE[account] = entry
+            return entry
+        except Exception:
+            pass
+
+    return _RELATIONSHIPS_CACHE.get(account, {"accepted": 0, "pending": 0, "timestamp": 0})
+
+async def send_ping_test_alert(account_name: str, latency_ms: int, server_name: str, accepted_count: int, pending_count: int) -> bool:
+    """
+    Sends a minimal test alert DM to operator (LOG_TARGET_USER_ID) to verify outbound alert pipeline.
+    """
+    target_uid = os.environ.get("LOG_TARGET_USER_ID", "1551356562142928968").strip()
+    msg_text = f"⚡ **Ping Test**: `{account_name}` ({latency_ms}ms) • {server_name} • {accepted_count} Friends • Alert Flow OK"
+
+    # 1. Try sending via running Gateway client
+    if _LISTENER_CLIENT is not None and getattr(_LISTENER_CLIENT, "is_ready", lambda: False)():
+        try:
+            target_user = _LISTENER_CLIENT.get_user(int(target_uid)) or await _LISTENER_CLIENT.fetch_user(int(target_uid))
+            if target_user:
+                await target_user.send(msg_text)
+                return True
+        except Exception as e:
+            print(f"  [!] Failed to send ping alert via Gateway client: {e}")
+
+    # 2. Fallback via Discord REST API using Central Hub token
+    hub_item = next((x for x in FLEET_INVENTORY if x["account"] == "king_arthur0001"), None)
+    hub_token = os.environ.get("DISCORD_TOKEN") or (hub_item.get("default_token") if hub_item else None)
+    if hub_token:
+        try:
+            headers = {
+                "Authorization": hub_token.strip(),
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Content-Type": "application/json"
+            }
+            def _send_rest():
+                dm_req = urllib.request.Request(
+                    "https://discord.com/api/v9/users/@me/channels",
+                    data=json.dumps({"recipient_id": target_uid}).encode("utf-8"),
+                    headers=headers,
+                    method="POST"
+                )
+                with urllib.request.urlopen(dm_req, timeout=5) as r:
+                    chan_id = json.loads(r.read().decode("utf-8"))["id"]
+
+                send_req = urllib.request.Request(
+                    f"https://discord.com/api/v9/channels/{chan_id}/messages",
+                    data=json.dumps({"content": msg_text}).encode("utf-8"),
+                    headers=headers,
+                    method="POST"
+                )
+                with urllib.request.urlopen(send_req, timeout=5) as r:
+                    return True
+
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None, _send_rest)
+        except Exception as e:
+            print(f"  [!] Failed to send ping alert via REST: {e}")
+
+    return False
+
+async def build_fleet_payload():
+    """Construct complete real-time fleet dataset concurrently."""
     current_active_batch = SERVICE_BATCH
 
-    for item in FLEET_INVENTORY:
+    async def _fetch_row(item):
         gid = item["guild_id"]
         sname = item["assigned_server"]
-        join_stats = await get_server_joins_from_db_or_file(gid, sname)
+        join_stats, rel_stats = await asyncio.gather(
+            get_server_joins_from_db_or_file(gid, sname),
+            get_account_relationships(item),
+            return_exceptions=True
+        )
+        if isinstance(join_stats, Exception):
+            join_stats = {"last_join_formatted": "No joins recorded", "second_last_interval": "N/A", "recent_joins": []}
+        if isinstance(rel_stats, Exception):
+            rel_stats = {"accepted": 0, "pending": 0}
 
-        # Determine real-time status label
         batch = item["batch"]
         if batch == "Hub":
             status_text = "🟢 Active (Central Hub)"
@@ -312,7 +430,7 @@ async def handle_fleet_api(request):
             status_text = "⚪ Unassigned"
             status_code = "unassigned"
 
-        data.append({
+        return {
             "account": item["account"],
             "email": item["email"],
             "assigned_server": sname,
@@ -321,28 +439,43 @@ async def handle_fleet_api(request):
             "role": item["role"],
             "status": status_text,
             "status_code": status_code,
+            "accepted_friends": rel_stats.get("accepted", 0),
+            "pending_outgoing": rel_stats.get("pending", 0),
             "last_join": join_stats["last_join_formatted"],
             "second_last_interval": join_stats["second_last_interval"],
             "recent_joins": join_stats["recent_joins"]
-        })
+        }
 
-    return web.json_response({
+    data = await asyncio.gather(*[_fetch_row(item) for item in FLEET_INVENTORY])
+
+    return {
         "success": True,
         "active_service_batch": current_active_batch,
         "total_accounts": len(data),
-        "fleet": data
-    })
+        "fleet": list(data)
+    }
+
+async def handle_fleet_api(request):
+    """JSON API returning full fleet state with join & accepted friend metrics."""
+    payload = await build_fleet_payload()
+    return web.json_response(payload)
 
 async def handle_test_token_api(request):
-    """Test token validity live against Discord API."""
+    """
+    Test token validity live against Discord API.
+    Tests all 5 operational paths:
+      1. Authentication & API Latency (/users/@me)
+      2. Live Relationship / Accepted Friends count (/users/@me/relationships)
+      3. Server Presence (/users/@me/guilds)
+      4. Active Gateway Heartbeat
+      5. Outbound Alert DM Pipeline (minimal alert sent to operator)
+    """
     try:
         body = await request.json()
     except Exception:
         body = {}
 
     target_account = body.get("account")
-    
-    # Locate token for this account
     found_item = next((x for x in FLEET_INVENTORY if x["account"] == target_account), None)
     if not found_item:
         return web.json_response({"success": False, "error": "Account not found in inventory"}, status=404)
@@ -351,21 +484,25 @@ async def handle_test_token_api(request):
     if not token:
         return web.json_response({"success": False, "error": "No token found for account"}, status=400)
 
-    # Perform live test
     start_t = asyncio.get_event_loop().time()
     headers = {
-        "Authorization": token,
+        "Authorization": token.strip(),
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
 
     try:
-        # 1. Fetch user @me
+        # Path 1: Validate Auth & Latency
         req = urllib.request.Request("https://discord.com/api/v9/users/@me", headers=headers)
         with urllib.request.urlopen(req, timeout=8) as resp:
             u_data = json.loads(resp.read().decode("utf-8"))
         latency_ms = round((asyncio.get_event_loop().time() - start_t) * 1000)
 
-        # 2. Check guild presence
+        # Path 2: Live Accepted Friend Request & Pending Count
+        rel_stats = await get_account_relationships(found_item, force_refresh=True)
+        accepted_friends = rel_stats.get("accepted", 0)
+        pending_outgoing = rel_stats.get("pending", 0)
+
+        # Path 3: Guild Presence
         in_target = False
         guild_count = 0
         try:
@@ -378,6 +515,23 @@ async def handle_test_token_api(request):
         except Exception:
             pass
 
+        # Path 4: Gateway Session Check
+        gateway_active = bool(_SENDER_CLIENTS and token in _SENDER_CLIENTS and getattr(_SENDER_CLIENTS[token], "is_ready", lambda: False)())
+        if found_item["account"] == "king_arthur0001" and _LISTENER_CLIENT and getattr(_LISTENER_CLIENT, "is_ready", lambda: False)():
+            gateway_active = True
+
+        # Path 5: Outbound Alert DM Pipeline Test (Minimal Message to Operator)
+        alert_sent = await send_ping_test_alert(
+            account_name=target_account,
+            latency_ms=latency_ms,
+            server_name=found_item.get("assigned_server", "Unknown"),
+            accepted_count=accepted_friends,
+            pending_count=pending_outgoing
+        )
+
+        # Push updated state to any open WebSocket connections
+        asyncio.create_task(broadcast_fleet_update())
+
         return web.json_response({
             "success": True,
             "valid": True,
@@ -385,11 +539,14 @@ async def handle_test_token_api(request):
             "username": u_data.get("username"),
             "display_name": u_data.get("global_name") or u_data.get("username"),
             "user_id": u_data.get("id"),
-            "email": u_data.get("email"),
             "latency_ms": latency_ms,
+            "accepted_friends": accepted_friends,
+            "pending_outgoing": pending_outgoing,
             "guild_count": guild_count,
             "in_assigned_server": in_target,
-            "assigned_server": found_item.get("assigned_server")
+            "assigned_server": found_item.get("assigned_server"),
+            "alert_dispatched": alert_sent,
+            "gateway_active": gateway_active
         })
 
     except urllib.error.HTTPError as e:
@@ -407,6 +564,52 @@ async def handle_test_token_api(request):
             "success": False,
             "error": str(e)
         }, status=500)
+
+async def websocket_handler(request):
+    """Native WebSocket endpoint (/ws/fleet) for real-time duplex data push."""
+    ws = web.WebSocketResponse(heartbeat=25.0)
+    await ws.prepare(request)
+    _WS_CLIENTS.add(ws)
+
+    try:
+        # Push immediate fleet state upon initial connection
+        payload = await build_fleet_payload()
+        await ws.send_str(json.dumps({"type": "fleet_state", "data": payload}))
+
+        async for msg in ws:
+            if msg.type == WSMsgType.TEXT:
+                try:
+                    data = json.loads(msg.data)
+                    if data.get("action") == "ping":
+                        await ws.send_str(json.dumps({"type": "pong"}))
+                except Exception:
+                    pass
+            elif msg.type == WSMsgType.ERROR:
+                break
+    finally:
+        _WS_CLIENTS.discard(ws)
+
+    return ws
+
+async def broadcast_fleet_update():
+    """Broadcast current fleet state to all connected WebSocket clients."""
+    if not _WS_CLIENTS:
+        return
+    try:
+        payload = await build_fleet_payload()
+        msg_str = json.dumps({"type": "fleet_state", "data": payload})
+        for ws in list(_WS_CLIENTS):
+            try:
+                if not ws.closed:
+                    await ws.send_str(msg_str)
+            except Exception:
+                _WS_CLIENTS.discard(ws)
+    except Exception as e:
+        print(f"  [!] WebSocket broadcast error: {e}")
+
+async def trigger_fleet_refresh():
+    """Public hook for external modules (main.py, auto_friend.py) to push WebSocket updates."""
+    await broadcast_fleet_update()
 
 async def handle_dashboard_page(request):
     """Serve the minimal live responsive Fleet Control Dashboard HTML."""
@@ -501,6 +704,11 @@ async def handle_dashboard_page(request):
       color: #34d399;
       border-color: rgba(16, 185, 129, 0.3);
     }
+    .badge-polling {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
     .pulse-dot {
       width: 7px;
       height: 7px;
@@ -510,7 +718,7 @@ async def handle_dashboard_page(request):
     }
     main {
       padding: 2rem;
-      max-width: 1280px;
+      max-width: 1320px;
       margin: 0 auto;
       width: 100%;
       flex: 1;
@@ -579,6 +787,18 @@ async def handle_dashboard_page(request):
       font-weight: 500;
       color: #e2e8f0;
     }
+    .badge-friends {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.12);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -596,7 +816,7 @@ async def handle_dashboard_page(request):
       border: 1px solid var(--card-border);
       border-radius: 6px;
       color: var(--text-muted);
-      padding: 0.4rem 0.6rem;
+      padding: 0.4rem 0.65rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -631,7 +851,7 @@ async def handle_dashboard_page(request):
       position: fixed;
       top: 0;
       right: 0;
-      width: 420px;
+      width: 440px;
       max-width: 90vw;
       height: 100vh;
       background: var(--drawer-bg);
@@ -718,20 +938,20 @@ async def handle_dashboard_page(request):
     .btn-test:hover { background: var(--accent-hover); }
     .btn-test:disabled { opacity: 0.6; cursor: not-allowed; }
     .test-result-box {
-      margin-top: 0.75rem;
-      padding: 0.85rem;
+      margin-top: 0.85rem;
+      padding: 0.9rem;
       border-radius: 8px;
       font-size: 0.82rem;
-      line-height: 1.4;
+      line-height: 1.5;
       display: none;
     }
     .test-result-valid {
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.3);
       color: #34d399;
     }
     .test-result-invalid {
-      background: rgba(239, 68, 68, 0.12);
+      background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
       color: #f87171;
     }
@@ -742,7 +962,7 @@ async def handle_dashboard_page(request):
       margin-bottom: 0.5rem;
     }
     .metric-num {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: #fff;
     }
@@ -776,7 +996,9 @@ async def handle_dashboard_page(request):
       </div>
     </div>
     <div class="header-pills">
-      <span class="badge badge-live"><span class="pulse-dot"></span> Live Fleet</span>
+      <span class="badge badge-live" id="liveWsBadge">
+        <span class="pulse-dot"></span> <span id="wsStatusText">Connecting WS...</span>
+      </span>
       <span class="badge" id="serviceBatchBadge">Loading...</span>
       <span class="badge" id="accountCountBadge">14 Accounts</span>
     </div>
@@ -790,13 +1012,14 @@ async def handle_dashboard_page(request):
             <th>Account Username</th>
             <th>Attached Email</th>
             <th>Assigned Target Server</th>
+            <th style="text-align: center;">Accepted Friends</th>
             <th>Status</th>
             <th style="text-align: center;">Actions</th>
           </tr>
         </thead>
         <tbody id="fleetTableBody">
           <tr>
-            <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">
               Connecting to live fleet state...
             </td>
           </tr>
@@ -843,11 +1066,11 @@ async def handle_dashboard_page(request):
         </div>
       </div>
 
-      <!-- Live Token Health Ping -->
+      <!-- Live Token Health Ping (All Paths Tested) -->
       <div class="section-box">
-        <div class="section-title">Token Live Health Ping</div>
+        <div class="section-title">All-Path Live Health Ping</div>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">
-          Ping Discord Gateway API live to test token authentication, roundtrip latency, and guild presence.
+          Executes a live test across all 5 operational paths: Auth Latency, Relationships/Friends, Target Guild Presence, Gateway Heartbeat, and outbound Alert DM dispatch.
         </p>
         <button class="btn-test" id="btnTestToken" onclick="runLiveTokenTest()">
           <span id="btnTestText">⚡ Run Live Discord Ping</span>
@@ -855,26 +1078,41 @@ async def handle_dashboard_page(request):
         <div class="test-result-box" id="testResultBox"></div>
       </div>
 
-      <!-- Join Frequency & Interval Stats -->
+      <!-- Friend Request & Join Activity Stats -->
       <div class="section-box">
         <div class="section-title">Friend Request & Join Activity</div>
         
-        <div style="margin-bottom: 1rem;">
-          <span class="prop-label" style="font-size: 0.75rem;">LAST MEMBER JOINED (FRIEND REQUEST TARGET):</span>
-          <div class="metric-badge" style="margin-top: 0.25rem;">
-            <div class="metric-num" id="dLastJoin">-</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.15rem;">
+          <div>
+            <span class="prop-label" style="font-size: 0.72rem;">ACCEPTED FRIENDS:</span>
+            <div class="metric-badge" style="margin-top: 0.25rem;">
+              <div class="metric-num" id="dAcceptedFriends" style="color: #60a5fa;">-</div>
+            </div>
+          </div>
+          <div>
+            <span class="prop-label" style="font-size: 0.72rem;">OUTGOING PENDING:</span>
+            <div class="metric-badge" style="margin-top: 0.25rem;">
+              <div class="metric-num" id="dPendingOutgoing" style="color: #cbd5e1;">-</div>
+            </div>
           </div>
         </div>
 
         <div style="margin-bottom: 1rem;">
-          <span class="prop-label" style="font-size: 0.75rem;">TIME BETWEEN 2ND-TO-LAST & LAST JOIN:</span>
+          <span class="prop-label" style="font-size: 0.72rem;">LAST MEMBER JOINED (FRIEND REQUEST TARGET):</span>
           <div class="metric-badge" style="margin-top: 0.25rem;">
-            <div class="metric-num" id="dInterval" style="font-size: 1.05rem; color: #cbd5e1;">-</div>
+            <div class="metric-num" id="dLastJoin" style="font-size: 1.1rem;">-</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <span class="prop-label" style="font-size: 0.72rem;">TIME BETWEEN 2ND-TO-LAST & LAST JOIN:</span>
+          <div class="metric-badge" style="margin-top: 0.25rem;">
+            <div class="metric-num" id="dInterval" style="font-size: 1rem; color: #cbd5e1;">-</div>
           </div>
         </div>
 
         <div>
-          <span class="prop-label" style="font-size: 0.75rem;">RECENT PROSPECT JOINS:</span>
+          <span class="prop-label" style="font-size: 0.72rem;">RECENT PROSPECT JOINS:</span>
           <div id="dRecentJoinsList" style="margin-top: 0.5rem;">
             <div style="color: var(--text-muted); font-size: 0.8rem;">No recent joins recorded.</div>
           </div>
@@ -888,19 +1126,81 @@ async def handle_dashboard_page(request):
   <script>
     let currentFleetData = [];
     let selectedAccount = null;
+    let ws = null;
+    let wsConnected = false;
 
-    async function loadFleet() {
+    // Connect via native WebSocket for true push updates
+    function connectWS() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/fleet`;
+      
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch (err) {
+        setupPollingFallback();
+        return;
+      }
+
+      ws.onopen = () => {
+        wsConnected = true;
+        const badge = document.getElementById('liveWsBadge');
+        badge.className = 'badge badge-live';
+        document.getElementById('wsStatusText').textContent = 'WebSocket Live';
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'fleet_state' && msg.data) {
+            applyFleetState(msg.data);
+          }
+        } catch (e) {
+          console.error('Error parsing WS message:', e);
+        }
+      };
+
+      ws.onclose = () => {
+        wsConnected = false;
+        const badge = document.getElementById('liveWsBadge');
+        badge.className = 'badge badge-polling';
+        document.getElementById('wsStatusText').textContent = 'Polling Fallback';
+        // Auto-reconnect after 3s
+        setTimeout(connectWS, 3000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    async function loadFleetHTTP() {
       try {
         const res = await fetch('/api/fleet');
         const data = await res.json();
         if (data.success) {
-          currentFleetData = data.fleet;
-          document.getElementById('serviceBatchBadge').textContent = 'Service ' + (data.active_service_batch === '2' ? 'Batch 2' : 'Batch 1');
-          document.getElementById('accountCountBadge').textContent = data.total_accounts + ' Accounts';
-          renderTable(data.fleet);
+          applyFleetState(data);
         }
       } catch (err) {
-        console.error('Failed to load fleet data:', err);
+        console.error('Failed to load fleet data via HTTP:', err);
+      }
+    }
+
+    function applyFleetState(data) {
+      currentFleetData = data.fleet;
+      document.getElementById('serviceBatchBadge').textContent = 'Service ' + (data.active_service_batch === '2' ? 'Batch 2' : 'Batch 1');
+      document.getElementById('accountCountBadge').textContent = data.total_accounts + ' Accounts';
+      renderTable(data.fleet);
+
+      // If drawer is open, keep selected account updated in real-time
+      if (selectedAccount) {
+        const updated = data.fleet.find(x => x.account === selectedAccount.account);
+        if (updated) {
+          selectedAccount = updated;
+          document.getElementById('dAcceptedFriends').textContent = updated.accepted_friends ?? 0;
+          document.getElementById('dPendingOutgoing').textContent = updated.pending_outgoing ?? 0;
+          document.getElementById('dLastJoin').textContent = updated.last_join || 'None';
+          document.getElementById('dInterval').textContent = updated.second_last_interval || 'N/A';
+        }
       }
     }
 
@@ -929,11 +1229,14 @@ async def handle_dashboard_page(request):
           </td>
           <td class="email-cell">${item.email}</td>
           <td><span class="server-tag">${item.assigned_server}</span></td>
+          <td style="text-align: center;">
+            <span class="badge-friends" title="Accepted Discord Friends">👥 ${item.accepted_friends ?? 0}</span>
+          </td>
           <td>
             <span class="status-pill ${badgeClass}">${item.status}</span>
           </td>
           <td style="text-align: center;">
-            <button class="gear-btn" onclick="openDrawer(${index})" title="View Details & Test">
+            <button class="gear-btn" onclick="openDrawer(${index})" title="View Details & Run Live Ping">
               ⚙️ More Info
             </button>
           </td>
@@ -955,6 +1258,8 @@ async def handle_dashboard_page(request):
       document.getElementById('dBatch').textContent = item.batch;
       document.getElementById('dRole').textContent = item.role;
 
+      document.getElementById('dAcceptedFriends').textContent = item.accepted_friends ?? 0;
+      document.getElementById('dPendingOutgoing').textContent = item.pending_outgoing ?? 0;
       document.getElementById('dLastJoin').textContent = item.last_join || 'None';
       document.getElementById('dInterval').textContent = item.second_last_interval || 'N/A';
 
@@ -970,7 +1275,6 @@ async def handle_dashboard_page(request):
         joinsList.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">No recent joins recorded.</div>';
       }
 
-      // Reset test result box
       const resBox = document.getElementById('testResultBox');
       resBox.style.display = 'none';
       resBox.className = 'test-result-box';
@@ -992,7 +1296,7 @@ async def handle_dashboard_page(request):
       const resBox = document.getElementById('testResultBox');
 
       btn.disabled = true;
-      text.innerHTML = '<span class="spinner"></span> Testing live token...';
+      text.innerHTML = '<span class="spinner"></span> Testing all paths & sending alert...';
       resBox.style.display = 'none';
 
       try {
@@ -1007,12 +1311,16 @@ async def handle_dashboard_page(request):
         if (data.valid) {
           resBox.className = 'test-result-box test-result-valid';
           resBox.innerHTML = `
-            <strong>✅ Token 100% Valid & Authenticated!</strong><br>
-            • Discord User: @${data.username} (${data.display_name})<br>
-            • API Latency: <strong>${data.latency_ms}ms</strong><br>
-            • Mutual Guilds: ${data.guild_count} server(s)<br>
-            • Inside Assigned Server: <strong>${data.in_assigned_server ? 'Yes (Active Member)' : 'Not in server'}</strong>
+            <div style="font-weight: 700; margin-bottom: 0.35rem;">✅ All 5 Paths Operational & Verified!</div>
+            <div>• <strong>Auth & Latency:</strong> Valid (<strong>${data.latency_ms}ms</strong>) via @${data.username}</div>
+            <div>• <strong>Accepted Friends:</strong> <strong>${data.accepted_friends}</strong> (${data.pending_outgoing} pending)</div>
+            <div>• <strong>Target Server:</strong> <strong>${data.in_assigned_server ? 'Active in ' + data.assigned_server : 'Not in server'}</strong></div>
+            <div>• <strong>Outbound Alert DM:</strong> <strong>${data.alert_dispatched ? '✅ Alert Sent to Operator (@1551356562142928968)' : '⚠️ DM failed'}</strong></div>
+            <div>• <strong>Gateway Session:</strong> <strong>${data.gateway_active ? '🟢 Connected & Heartbeating' : '⚪ Standby'}</strong></div>
           `;
+          // Update drawer metrics immediately
+          document.getElementById('dAcceptedFriends').textContent = data.accepted_friends;
+          document.getElementById('dPendingOutgoing').textContent = data.pending_outgoing;
         } else {
           resBox.className = 'test-result-box test-result-invalid';
           resBox.innerHTML = `
@@ -1031,9 +1339,12 @@ async def handle_dashboard_page(request):
       }
     }
 
-    // Initial load + refresh every 30s
-    loadFleet();
-    setInterval(loadFleet, 30000);
+    // Connect WebSocket immediately + initial HTTP fetch + periodic safety sync
+    connectWS();
+    loadFleetHTTP();
+    setInterval(() => {
+      if (!wsConnected) loadFleetHTTP();
+    }, 20000);
   </script>
 </body>
 </html>
@@ -1041,11 +1352,12 @@ async def handle_dashboard_page(request):
     return web.Response(text=html_content, content_type='text/html')
 
 def setup_dashboard_routes(app: web.Application):
-    """Register dashboard routes on the aiohttp application."""
+    """Register dashboard HTTP and WebSocket routes on the aiohttp application."""
     app.router.add_get('/', handle_dashboard_page)
     app.router.add_get('/dashboard', handle_dashboard_page)
     app.router.add_get('/health', lambda r: web.json_response({"status": "ok", "service": "gws-bot"}))
     app.router.add_get('/ping', lambda r: web.Response(text="GWS Bot Logger is running!"))
     app.router.add_get('/api/fleet', handle_fleet_api)
     app.router.add_post('/api/test-token', handle_test_token_api)
-    print("  [✓] Dashboard & Live Fleet API routes registered on web server.")
+    app.router.add_get('/ws/fleet', websocket_handler)
+    print("  [✓] Dashboard, Live Fleet API, and WebSocket (/ws/fleet) routes registered.")

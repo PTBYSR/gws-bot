@@ -501,6 +501,13 @@ async def on_member_join(member):
     # Auto-Friend Request Dispatcher (sends request from configured external account)
     asyncio.create_task(dispatch_auto_friend(member, username_clean, client, LOG_TARGET_USER_ID))
 
+    # Push real-time fleet update across WebSocket to all dashboard tabs
+    try:
+        from dashboard import trigger_fleet_refresh
+        asyncio.create_task(trigger_fleet_refresh())
+    except Exception:
+        pass
+
     # Send WhatsApp alert (paused)
     # await send_whatsapp_alert(member, username_clean, is_recovery=False)
 

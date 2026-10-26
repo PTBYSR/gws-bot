@@ -383,6 +383,11 @@ async def start_sender_gateway_client(token: str, label: str):
         if (before.type == discord.RelationshipType.outgoing_request and
                 after.type == discord.RelationshipType.friend):
             await notify_friend_accepted(sender_label=label, friend_user=after.user, sender_token=token)
+            try:
+                from dashboard import trigger_fleet_refresh
+                asyncio.create_task(trigger_fleet_refresh())
+            except Exception:
+                pass
 
     @client.event
     async def on_relationship_add(relationship):
@@ -390,6 +395,11 @@ async def start_sender_gateway_client(token: str, label: str):
         if relationship.type == discord.RelationshipType.friend:
             # This fires if Discord sends the relationship as a new add (instead of update)
             await notify_friend_accepted(sender_label=label, friend_user=relationship.user, sender_token=token)
+            try:
+                from dashboard import trigger_fleet_refresh
+                asyncio.create_task(trigger_fleet_refresh())
+            except Exception:
+                pass
 
     @client.event
     async def on_message(message):
