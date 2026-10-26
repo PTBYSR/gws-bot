@@ -567,9 +567,13 @@ async def send_auto_friend_request(target_user_id: str, target_username: str, gu
                         return {"success": True, "sender_label": sender_label, "method": "gateway_username"}
                     raise he
         except discord.HTTPException as e:
-            if "captcha" in str(e).lower() or e.status == 400:
+            err_str = str(e).lower()
+            if "captcha" in err_str:
                 print(f"  [!] Discord challenged {sender_label} with hCaptcha. Request paused to protect token.")
                 return {"success": False, "captcha_required": True, "sender_label": sender_label}
+            elif e.status == 400:
+                print(f"  [ℹ] Cannot friend `{target_username}`: User privacy settings restrict incoming friend requests.")
+                return {"success": False, "requests_disabled": True, "sender_label": sender_label}
             elif e.status == 429:
                 print(f"  [!] Discord Rate Limit (429) on {sender_label}.")
                 return {"success": False, "rate_limited": True}
@@ -612,6 +616,9 @@ async def dispatch_auto_friend(member, username_clean: str, listener_client, log
                 sender_label = result.get("sender_label", "Sender")
                 if result.get("success"):
                     msg = f"🤝 Added `{username_clean}` • {member.guild.name}"
+                    await target_user.send(msg)
+                elif result.get("requests_disabled"):
+                    msg = f"🚫 `{username_clean}` not accepting friend requests • {member.guild.name} *(Privacy locked — skipped)*"
                     await target_user.send(msg)
                 elif result.get("captcha_required"):
                     msg = f"⚠️ Captcha required on `{sender_label}` for `{username_clean}`"
