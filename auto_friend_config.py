@@ -106,7 +106,7 @@ BATCH_2_SERVERS = {
     },
     "1122865043952898128": {
         "server_name": "Trading University",
-        "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR1Nzbk5ZLk5uUHZ0Rm5ib0tUYjQ0c045Szh1MUcxOVJlZmRRUGlTeUplNHdV"),
+        "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR3llU2JnLm9BWi1TNWdxM0cxak8zdHA2bHI5by11U1JrMmo0UXlMVm9RZU1j"),
         "sender_label": "iam.vk7._",
         "enabled": True,
         "delay_seconds": 6.0,
