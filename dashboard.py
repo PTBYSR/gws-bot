@@ -96,7 +96,7 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv")
     },
     {
-        "account": "breaking.chad",
+        "account": "cooliam___",
         "email": "info@murdochvault.com",
         "assigned_server": "PAYTIENCE",
         "guild_id": "1306399620217438309",

@@ -86,7 +86,7 @@ BATCH_2_SERVERS = {
     "1306399620217438309": {
         "server_name": "PAYTIENCE",
         "sender_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0"),
-        "sender_label": "breaking.chad",
+        "sender_label": "cooliam___",
         "enabled": True,
         "delay_seconds": 6.0,
     },
