@@ -727,7 +727,8 @@ async def handle_dashboard_page(request):
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      overflow: hidden;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
     table {
@@ -745,11 +746,13 @@ async def handle_dashboard_page(request):
       text-transform: uppercase;
       font-size: 0.72rem;
       letter-spacing: 0.05em;
+      white-space: nowrap;
     }
     td {
       padding: 1rem 1.25rem;
       border-bottom: 1px solid rgba(30, 41, 59, 0.6);
       vertical-align: middle;
+      white-space: nowrap;
     }
     tr:last-child td { border-bottom: none; }
     tr.fleet-row {
@@ -806,6 +809,7 @@ async def handle_dashboard_page(request):
       border-radius: 6px;
       font-size: 0.76rem;
       font-weight: 600;
+      white-space: nowrap;
     }
     .status-hub { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
     .status-batch1 { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
@@ -823,6 +827,7 @@ async def handle_dashboard_page(request):
       justify-content: center;
       transition: all 0.2s ease;
       font-size: 0.85rem;
+      white-space: nowrap;
     }
     .gear-btn:hover {
       background: #1e293b;
@@ -983,6 +988,136 @@ async def handle_dashboard_page(request):
       animation: spin 0.8s ease-in-out infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Mobile Responsive Design (Top Bar & Table Card View) ── */
+    @media (max-width: 820px) {
+      header {
+        padding: 0.85rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+      .brand {
+        gap: 0.6rem;
+      }
+      .brand-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+      .brand-title {
+        font-size: 1.05rem;
+      }
+      .brand-sub {
+        font-size: 0.72rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .header-pills {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: flex-start;
+      }
+      .badge {
+        font-size: 0.72rem;
+        padding: 0.25rem 0.55rem;
+      }
+
+      main {
+        padding: 0.85rem 0.6rem;
+      }
+      .table-container {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr.fleet-row {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        margin-bottom: 0.85rem;
+        padding: 1.1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+      }
+      tr.fleet-row:hover {
+        background: var(--card-bg);
+      }
+      tr.fleet-row:active {
+        background: rgba(30, 41, 59, 0.7);
+      }
+      td {
+        padding: 0;
+        border-bottom: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        white-space: normal;
+      }
+      td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      td[data-label="Account"] {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.25rem;
+      }
+      td[data-label="Account"]::before {
+        display: none;
+      }
+      td[data-label="Email"] .email-cell,
+      td[data-label="Email"] {
+        font-size: 0.78rem;
+        word-break: break-all;
+      }
+      td[data-label="Actions"] {
+        margin-top: 0.5rem;
+        width: 100%;
+        display: block;
+      }
+      td[data-label="Actions"]::before {
+        display: none;
+      }
+      td[data-label="Actions"] .gear-btn {
+        width: 100%;
+        padding: 0.7rem;
+        font-weight: 600;
+        background: rgba(59, 130, 246, 0.12);
+        color: #93c5fd;
+        border-color: rgba(59, 130, 246, 0.3);
+        border-radius: 8px;
+        font-size: 0.88rem;
+      }
+      .drawer-panel {
+        width: 100vw;
+        max-width: 100vw;
+      }
+      .drawer-header {
+        padding: 1.15rem 1.25rem;
+      }
+      .drawer-body {
+        padding: 1.15rem 1.25rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1221,21 +1356,21 @@ async def handle_dashboard_page(request):
         else if (item.status_code === 'manual') badgeClass = 'status-manual';
 
         tr.innerHTML = `
-          <td>
+          <td data-label="Account">
             <div class="account-cell">
               <div class="avatar-placeholder">${item.account.charAt(0).toUpperCase()}</div>
               <div>${item.account}</div>
             </div>
           </td>
-          <td class="email-cell">${item.email}</td>
-          <td><span class="server-tag">${item.assigned_server}</span></td>
-          <td style="text-align: center;">
+          <td data-label="Email" class="email-cell">${item.email}</td>
+          <td data-label="Target Server"><span class="server-tag">${item.assigned_server}</span></td>
+          <td data-label="Accepted Friends" style="text-align: center;">
             <span class="badge-friends" title="Accepted Discord Friends">👥 ${item.accepted_friends ?? 0}</span>
           </td>
-          <td>
+          <td data-label="Status">
             <span class="status-pill ${badgeClass}">${item.status}</span>
           </td>
-          <td style="text-align: center;">
+          <td data-label="Actions" style="text-align: center;">
             <button class="gear-btn" onclick="openDrawer(${index})" title="View Details & Run Live Ping">
               ⚙️ More Info
             </button>
