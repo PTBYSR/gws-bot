@@ -42,6 +42,15 @@ if os.path.exists(MANUAL_SERVERS_FILE):
     except Exception as e:
         print(f"  [!] Note: Could not load manual_servers.json: {e}")
 
+# Servers explicitly excluded from ever sending alerts or recovering joins
+EXCLUDED_SERVERS = {
+    "950303499114119168",   # Belton's PoE Market Masters
+    "1103147180509900831",  # Market Masters - Real Estate
+    "398075210949066764",   # Elite Crypto Signals
+    "818847298083094649",   # Lottery Stocks
+    "336549553891442689",   # HaiKhuu Trading
+}
+
 # Create logs directory locally (ephemeral on Render free tier)
 LOGS_DIR = os.path.join(os.path.dirname(__file__), "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -309,8 +318,15 @@ async def recover_missed_joins():
     recovered_count = 0
 
     for guild in client.guilds:
-        if TARGET_SERVERS and str(guild.id) not in TARGET_SERVERS:
+        gid = str(guild.id)
+        if gid in EXCLUDED_SERVERS:
             continue
+        allowed_guilds = set(AUTO_FRIEND_SERVERS.keys()) | set(MANUAL_FAST_SERVERS)
+        if TARGET_SERVERS:
+            allowed_guilds.update(TARGET_SERVERS)
+        if gid not in allowed_guilds:
+            continue
+
 
         try:
             # Fetch all members (requires members intent for bots, works with selfbot)
@@ -441,9 +457,18 @@ async def on_guild_join(guild):
 @client.event
 async def on_member_join(member):
     """Fires when a new user joins any server this account is in."""
-    # Skip if we only target specific servers
-    if TARGET_SERVERS and str(member.guild.id) not in TARGET_SERVERS:
+    gid = str(member.guild.id)
+    if gid in EXCLUDED_SERVERS:
         return
+
+    # Strictly filter: only allow configured fleet servers or manual fast add servers
+    allowed_guilds = set(AUTO_FRIEND_SERVERS.keys()) | set(MANUAL_FAST_SERVERS)
+    if TARGET_SERVERS:
+        allowed_guilds.update(TARGET_SERVERS)
+
+    if gid not in allowed_guilds:
+        return
+
 
     # Clean username formatting
     username_clean = f"{member.name}"

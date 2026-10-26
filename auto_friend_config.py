@@ -74,8 +74,29 @@ BATCH_1_SERVERS = {
     },
 }
 
-# ── Batch 2 Fleet Configuration (Render Service 2: 5 Accounts) ──
+# ── Batch 2 Fleet Configuration (Render Service 2: Target Servers) ──
 BATCH_2_SERVERS = {
+    "1297957813644951613": {
+        "server_name": "Liquidity Theory",
+        "sender_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv"),
+        "sender_label": "brendan.guastaferro._",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "1306399620217438309": {
+        "server_name": "PAYTIENCE",
+        "sender_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0"),
+        "sender_label": "rhu.wan",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+    "1069351223217635428": {
+        "server_name": "Web-Based Wealth",
+        "sender_token": _dec("TVRVMk16SXdOVEkyT1RJek1EUTFOamt4TXcuR0t3bDhhLjZ1ZGQ5Z2dBVFpkeFpuU3pBWFRRLUJYX2pfaFNoZ1I4b0FNcFZB"),
+        "sender_label": "ecsadmin_",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
     "828801846277308426": {
         "server_name": "Mylol Trading Community",
         "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR0hOaWhrLk5RM1NGNzhpU2xQZGxxcFFDQnVqQW50MlZvY3JMRkxjQ1FEVmVr"),
@@ -94,20 +115,6 @@ BATCH_2_SERVERS = {
         "server_name": "PASE",
         "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuR1lKUVBkLkU1YWRxb1JXdGRtQ2FkX1pONDZvWUdGcVAzYmlmQU05Z2Nja1c0"),
         "sender_label": "nicliu___",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
-    "1334980338467733596": {
-        "server_name": "Verified Wealth",
-        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn"),
-        "sender_label": "adem__82099",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
-    "563389318773604382": {
-        "server_name": "Horizon Trading",
-        "sender_token": _dec("TVRVMk16RTVPRFF5TVRFek1UVTVOVGt4TncuR0Fmc2RYLllCclBxWlB6TXYyclBsdDJSQmd2ZWxuSGVKMWphVDdONTRsQ3N3"),
-        "sender_label": "horizon.trading",
         "enabled": True,
         "delay_seconds": 6.0,
     },
