@@ -554,18 +554,9 @@ async def send_auto_friend_request(target_user_id: str, target_username: str, gu
                 target_user = await client.fetch_user(int(target_user_id))
 
             if target_user:
-                try:
-                    await target_user.send_friend_request()
-                    print(f"  [+] Auto-Friend SUCCESS: {sender_label} sent friend request to `{target_username}` ({target_user_id}) via Gateway Profile!")
-                    return {"success": True, "sender_label": sender_label, "method": "gateway_user_profile"}
-                except discord.HTTPException as he:
-                    if he.status == 400 and not ("captcha" in str(he).lower()):
-                        # Fallback to username
-                        clean_name = target_username.split("#")[0] if "#" in target_username else target_username
-                        await client.http.send_friend_request(clean_name, 0)
-                        print(f"  [+] Auto-Friend SUCCESS: {sender_label} sent friend request to `{clean_name}` via Gateway Username!")
-                        return {"success": True, "sender_label": sender_label, "method": "gateway_username"}
-                    raise he
+                await target_user.send_friend_request()
+                print(f"  [+] Auto-Friend SUCCESS: {sender_label} sent friend request to `{target_username}` ({target_user_id}) via Gateway Profile!")
+                return {"success": True, "sender_label": sender_label, "method": "gateway_user_profile"}
         except discord.HTTPException as e:
             err_str = str(e).lower()
             if "captcha" in err_str:
