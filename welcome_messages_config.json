@@ -8,14 +8,14 @@
       "type": "text",
       "typing_seconds": 3,
       "delay_after_seconds": 5,
-      "message": "hello {name}, welcome to {server}, I'm {name display} an admin in this server. How are you doing?"
+      "message": "Hello, welcome to {server}, how are you doing?"
     },
     {
       "step": 2,
       "type": "text",
       "typing_seconds": 20,
       "delay_after_seconds": 2,
-      "message": "before we continue,  for security reasons and to protect our community from unwanted actions, I'll advise that it's important to follow my instructions. Due to recent influx of spam and unwanted invite links ,I'll send you a guide on how to do that"
+      "message": "Before we continue, for security reasons and to protect our community from unwanted interactions, I recommend blocking impersonators from sending you DMs. Due to the recent increase in spam messages and unwanted invite links, I'll send you a guide on how to do so, i hope that'll be find by you?"
     },
     {
       "step": 3,

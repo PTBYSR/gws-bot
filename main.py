@@ -455,6 +455,32 @@ async def on_guild_join(guild):
     await save_servers_to_db(client.guilds, client.user)
 
 @client.event
+async def on_guild_channel_create(channel):
+    """Detects welcome channels created for new joins in servers with private join logs (e.g. PAYTIENCE)."""
+    if not hasattr(channel, "guild") or not channel.guild:
+        return
+    gid = str(channel.guild.id)
+    if gid == "1306399620217438309" and channel.name.startswith("welcome-"):
+        username_clean = channel.name.replace("welcome-", "")
+        target_uid = None
+        for target, overwrite in channel.overwrites.items():
+            if isinstance(target, (discord.User, discord.Member)) and target.id != client.user.id and target.id != 1499512922139922672:
+                target_uid = target.id
+                break
+
+        class TempMember:
+            def __init__(self, name, uid, guild):
+                self.name = name
+                self.discriminator = "0"
+                self.id = uid or (int(channel.id) >> 22) + 1420070400000
+                self.guild = guild
+                self.created_at = datetime.now(timezone.utc)
+
+        member = TempMember(username_clean, target_uid, channel.guild)
+        print(f"  [+] Detected PAYTIENCE welcome channel: #{channel.name} (Member: @{username_clean})")
+        await on_member_join(member)
+
+@client.event
 async def on_member_join(member):
     """Fires when a new user joins any server this account is in."""
     gid = str(member.guild.id)

@@ -391,24 +391,37 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
             sender_token=sender_token
         )
 
-        # Send introductory banner
+        # Send clean minimal introductory header
+        account_age_str = "Unknown"
+        created_at = getattr(target_user, "created_at", None)
+        if created_at:
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            diff = now - created_at
+            days = diff.days
+            if days >= 365:
+                years = days // 365
+                months = (days % 365) // 30
+                age_part = f"{years}y {months}m ({days}d old)"
+            elif days >= 30:
+                months = days // 30
+                age_part = f"{months}m old ({days}d)"
+            else:
+                age_part = f"{days}d old"
+            created_date_str = created_at.strftime("%Y-%m-%d")
+            account_age_str = f"{age_part} • Created: {created_date_str}"
+
+        user_loc = getattr(target_user, "locale", None) or "Not set on profile"
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-        mention_prefix = f"<@{LOG_TARGET_USER_ID}> " if LOG_TARGET_USER_ID else ""
-        banner = (
-            f"🎉 {mention_prefix}**Live Relay Bridge Active!**\n"
-            f"• **Prospect**: `{target_name}` (`{target_id_str}`)\n"
-            f"• **Sender Account**: `{sender_label}`\n"
-            f"• **Origin Server**: `{origin_server_name}`\n"
-            f"• **Started**: `{timestamp} UTC`\n"
-            f"─────────────────────────────────────\n"
-            f"💬 **How to chat from your iPhone:**\n"
-            f"• Type your message directly here — `{sender_label}` sends it as a DM to `{target_name}`!\n"
-            f"• **Replies**: Swipe or tap 'Reply' on any message (text or photo) to reply natively.\n"
-            f"• **Photos**: Upload pictures from your camera roll — they are sent as native image files.\n"
-            f"• **Mentions**: Type `@them`, `@user`, or `@{target_name}` to ping them in DM.\n"
-            f"• **Auto-Drip**: Type `!drip` or `!welcome` to trigger the automated 4-message welcome sequence.\n"
-            f"*(A ✅ reaction confirms successful delivery).* "
-        )
+
+        banner = "\n".join([
+            f"📌 **Server**: `{origin_server_name}`",
+            f"📍 **Location**: `{user_loc}`",
+            f"⏰ **Accepted**: `{timestamp} UTC`",
+            f"🎂 **Account Age**: `{account_age_str}`",
+            "─────────────────────────────────────"
+        ])
         await new_channel.send(banner)
         print(f"  [+] Created Relay Channel: #{new_channel.name} ({new_channel.id}) in GWS Control Hub!")
         asyncio.create_task(bump_channel_to_top(new_channel, bump_category=True))

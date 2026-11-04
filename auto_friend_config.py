@@ -121,9 +121,8 @@ BATCH_2_SERVERS = {
 }
 
 # ── Dynamic Batch Selector ──
-# Render Service 1 sets SERVICE_BATCH=1 (default)
-# Render Service 2 sets SERVICE_BATCH=2
-SERVICE_BATCH = str(os.environ.get("SERVICE_BATCH", "1")).strip().lower()
+# Set SERVICE_BATCH="all" by default so a single runner handles both batches
+SERVICE_BATCH = str(os.environ.get("SERVICE_BATCH", "all")).strip().lower()
 
 if SERVICE_BATCH == "2":
     AUTO_FRIEND_SERVERS = BATCH_2_SERVERS

@@ -241,14 +241,7 @@ async def run_welcome_drip_sequence(
         print(f"  [!] Failed to get/create DM channel with {friend_id}: {e}")
         return
 
-    # Post initial status in relay channel
-    if relay_channel:
-        try:
-            await relay_channel.send(
-                f"🤖 **Automated Welcome Drip Started** ({len(sequence)} messages scheduled via `{sender_label}`)"
-            )
-        except Exception:
-            pass
+    # (Initial noisy status banner removed per operator preference)
 
     for idx, item in enumerate(sequence, start=1):
         step_num = item.get("step", idx)
@@ -334,7 +327,7 @@ async def run_welcome_drip_sequence(
             if relay_channel:
                 try:
                     from relay_bridge import save_msg_mapping
-                    mirror_content = f"🤖 **[Auto-Drip {step_num}/{len(sequence)}]** `{sender_label}`:\n{formatted_text}"
+                    mirror_content = formatted_text
                     mirror_file = None
                     if msg_type == "photo" and file_bytes:
                         import io
