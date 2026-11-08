@@ -48,8 +48,43 @@ async def send_join_alert_dm(member, username_clean: str, listener_client, log_t
             or await listener_client.fetch_user(int(log_target_user_id))
         )
         if target_user:
-            dm_message = f"📥 `{username_clean}` • {member.guild.name}"
+            is_horizon = str(member.guild.id) == "563389318773604382" or "horizon" in member.guild.name.lower()
+            is_juicy = str(member.guild.id) == "797916560714235946" or "juicy" in member.guild.name.lower()
+            if is_horizon:
+                dm_message = f"🌅🔔 **[HORIZON TRADING]** 📥 `{username_clean}` has joined!"
+            elif is_juicy:
+                dm_message = f"🍊🔥 **[JUICY TRADEZ]** 🆕 `{username_clean}` just dropped in!"
+            else:
+                dm_message = f"📥 `{username_clean}` • {member.guild.name}"
             await target_user.send(dm_message)
+            if is_horizon:
+                try:
+                    from relay_bridge import trigger_buzz_burst
+                    asyncio.create_task(
+                        trigger_buzz_burst(
+                            client=listener_client,
+                            target_user_id=log_target_user_id,
+                            count=3,
+                            delay=0.5,
+                            auto_delete_after=15
+                        )
+                    )
+                except Exception as bz_err:
+                    print(f"  [!] Horizon buzz burst note: {bz_err}")
+            elif is_juicy:
+                try:
+                    from relay_bridge import trigger_buzz_burst
+                    asyncio.create_task(
+                        trigger_buzz_burst(
+                            client=listener_client,
+                            target_user_id=log_target_user_id,
+                            count=3,
+                            delay=0.5,
+                            auto_delete_after=15
+                        )
+                    )
+                except Exception as bz_err:
+                    print(f"  [!] Juicy buzz burst note: {bz_err}")
             print(f"  [✓] DM alert sent for `{username_clean}`")
     except Exception as e:
         print(f"  [!] Failed to send join DM to {log_target_user_id}: {e}")

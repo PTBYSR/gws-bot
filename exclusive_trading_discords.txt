@@ -1,0 +1,78 @@
+EXCLUSIVE STOCK TRADING DISCORD SERVERS REPORT
+Date: October 26, 2026
+Verified via Reddit Deep Search & Live Discord API
+
+================================================================================
+TOP 5 VERIFIED EXCLUSIVE SERVERS
+================================================================================
+
+1. r/SecurityAnalysis
+- Strategy: Fundamental Equity Valuation, 10-K Forensic Accounting, Value Investing
+- Members: 1,904 total / 109 online (Verified via Discord API)
+- Join Route: https://discord.gg/SqtpZb5 (or https://discord.gg/utYgjP4)
+- Cost: 100% Free
+- Activity Evidence:
+  * reddit.com/r/SecurityAnalysis/comments/k2c1dg/join_the_rsecurityanalysis_discord/ (u/MartholomewMind)
+  * reddit.com/r/SecurityAnalysis/comments/136sjpm/berkshire_annual_meeting_discussion_on/ (u/Nesjamag)
+  * reddit.com/r/SecurityAnalysis/comments/gctxwb/security_analysis_discord/ (u/iconic06)
+- Why Exclusive: Zero commercial ads, no signal selling, discussions centered on Berkshire Hathaway meetings, financial statements, and institutional fundamental analysis.
+- Risks/Red Flags: Slower-paced chat; not suitable for day trading or short-term scalps.
+- Confidence: High
+
+2. Value Investing Chat
+- Strategy: Long-Term Stock Investing, Balance Sheet & Free Cash Flow Analysis
+- Members: 1,725 total / 70 online (Verified via Discord API)
+- Join Route: https://discord.gg/fkzTrfK
+- Cost: 100% Free
+- Activity Evidence:
+  * reddit.com/r/ValueInvesting/comments/1816z9y/looking_for_value_investing_partner/
+  * reddit.com/r/ValueInvesting/comments/1f4x0g6/investor_talk_group/ (u/markie599)
+- Why Exclusive: Under 2,000 members, strict anti-meme and anti-pump moderation, members share in-depth equity research memos.
+- Risks/Red Flags: Low-frequency trading; quarterly/yearly investment horizons.
+- Confidence: High
+
+3. Automated Trading Discussion Group
+- Strategy: Quantitative & Algorithmic Stock/Options Trading, Backtesting, Broker APIs
+- Members: 384 total / 16 online (Verified via Discord API)
+- Join Route: https://discord.gg/V97dCRJ
+- Cost: 100% Free
+- Activity Evidence:
+  * reddit.com/r/algotrading/comments/8o3k77/algotrading_discordslack_channel/ (u/SwedishChristmas)
+  * reddit.com/r/algotrading/comments/bpmouk/trader_chatgroupsnetworking/
+- Why Exclusive: Small technical group under 400 members with zero commercial presence or signals. Natural barrier to entry requiring programming and quantitative understanding.
+- Risks/Red Flags: Technical barrier; not suited for manual discretionary chart traders.
+- Confidence: Medium-High
+
+4. Buff Traders
+- Strategy: Equity Day & Swing Trading, Technical Levels, Scanners & Tools
+- Members: 1,083 total / 53 online (Verified via Discord API)
+- Join Route: https://discord.gg/CM3VJgN
+- Cost: 100% Free
+- Activity Evidence:
+  * reddit.com/r/algotrading/comments/b08kcu/discord_group_for_algorithmic_trading/ (u/Haskellol420)
+  * Cross-referenced in r/Daytrading scanner building threads.
+- Why Exclusive: Enforces Discord Level 4 phone verification to block burner selfbots and spam; community-built trade tool sharing.
+- Risks/Red Flags: Requires phone verification to participate.
+- Confidence: Medium
+
+5. Tactical Edge Trading
+- Strategy: Volume Profile, Momentum Day Trading, Market Auction Theory, Index/Equity Options
+- Members: 1,936 total / 155 online (Verified via Discord API)
+- Join Route: https://discord.gg/tacticaledgetrading
+- Cost: Free lobby; optional $100/mo structured desk via LaunchPass
+- Activity Evidence:
+  * reddit.com/r/options/comments/1mihsng/trading_group_recommendations/
+  * launchpass.com/tactical-edge-trading
+- Why Exclusive: Strictly rejects alert/signal-following culture ("We do not sell signals, we train for execution"). Active community kept under 2,000 members.
+- Risks/Red Flags: Has an optional paid tier alongside the open server.
+- Confidence: Medium-High
+
+================================================================================
+NEAR-MISSES / EXCLUDED CANDIDATES (FAILED HARD FILTERS)
+================================================================================
+
+- THETA GANG (discord.gg/d4WNsTw): Excluded due to size (17,284 members, exceeds 15k cap).
+- NVSTly (discord.gg/4fEAb8aTPv): Excluded due to size (63,581 members, massive public app ecosystem).
+- Woof Streets (discord.gg/4yvT2cu4Tq): Excluded due to size (20,188 members) and promotional hype ("7000% gains").
+- WallstreetBaggers / Trading Analytics (discord.gg/4bjhqb9G5p): Excluded due to size (15,000+ members) and single-account spam (u/Layla_SC).
+- DayTraderCommunity (DTC): Excluded due to lack of independent confirmation (only posted by creator u/Stock-Ad-3347).

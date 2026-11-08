@@ -1,0 +1,66 @@
+[
+  {
+    "timestamp": "2026-10-30T12:01:28.202300+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @574gabe._. (ATG GABE (I WONT DM FIRST))\n\u2022 **User ID**: `725141648874537112`\n\ud83d\udc49 https://discord.com/users/725141648874537112"
+  },
+  {
+    "timestamp": "2026-10-30T12:13:28.517937+00:00",
+    "alert": "\ud83d\udce5 **Honeypot Joined New Server**: `Bookmap` (796500203984257078) \u2014 Watching for inbound fake admins..."
+  },
+  {
+    "timestamp": "2026-10-30T12:14:27.402562+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Bookmap`\n\u2022 **Role/Target**: `Server Impersonator (Bookmap)`\n\u2022 **Fake Admin**: @bruceatbookmap99. (Bruce at Bookmap)\n\u2022 **User ID**: `1406290919589806225`\n\ud83d\udc49 https://discord.com/users/1406290919589806225"
+  },
+  {
+    "timestamp": "2026-10-30T12:14:44.220660+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @danpatboukmap (DanP)\n\u2022 **User ID**: `1559288709516628164`\n\ud83d\udc49 https://discord.com/users/1559288709516628164"
+  },
+  {
+    "timestamp": "2026-10-30T12:15:29.396042+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Bookmap`\n\u2022 **Role/Target**: `Server Impersonator (Bookmap)`\n\u2022 **Fake Admin**: @.bruceqtbookmap (Bruce at Bookmap)\n\u2022 **User ID**: `439084172963741706`\n\ud83d\udc49 https://discord.com/users/439084172963741706"
+  },
+  {
+    "timestamp": "2026-10-30T12:15:49.252716+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Bookmap`\n\u2022 **Role/Target**: `Server Impersonator (Bookmap)`\n\u2022 **Fake Admin**: @.danpat_bookmap (DanP)\n\u2022 **User ID**: `1555192500468187228`\n\ud83d\udc49 https://discord.com/users/1555192500468187228"
+  },
+  {
+    "timestamp": "2026-10-30T12:19:23.820920+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Bookmap`\n\u2022 **Role/Target**: `Server Impersonator (Bookmap)`\n\u2022 **Fake Admin**: @_.danpatbookmap. (DanP)\n\u2022 **User ID**: `1560525860602249340`\n\ud83d\udc49 https://discord.com/users/1560525860602249340"
+  },
+  {
+    "timestamp": "2026-10-30T12:20:35.025629+00:00",
+    "alert": "\ud83d\udce5 **Honeypot Joined New Server**: `/r/RealDayTrading` (1058604837467607100) \u2014 Watching for inbound fake admins..."
+  },
+  {
+    "timestamp": "2026-10-30T12:22:07.959396+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @danpatbooksmap (DanP)\n\u2022 **User ID**: `1436716625293480127`\n\ud83d\udc49 https://discord.com/users/1436716625293480127"
+  },
+  {
+    "timestamp": "2026-10-30T12:33:13.508525+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @leeberao (Leebero)\n\u2022 **User ID**: `1536817844262539373`\n\ud83d\udc49 https://discord.com/users/1536817844262539373"
+  },
+  {
+    "timestamp": "2026-10-30T12:33:14.906729+00:00",
+    "alert": "\ud83d\udce5 **Honeypot Joined New Server**: `Flipped.Chat` (1164569956780888198) \u2014 Watching for inbound fake admins..."
+  },
+  {
+    "timestamp": "2026-10-30T12:33:49.587365+00:00",
+    "alert": "\ud83d\udce5 **Honeypot Joined New Server**: `Traderinput` (411253159957102602) \u2014 Watching for inbound fake admins..."
+  },
+  {
+    "timestamp": "2026-10-30T12:38:00.782514+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @reeks0094. (Reeks)\n\u2022 **User ID**: `1120676103342788628`\n\ud83d\udc49 https://discord.com/users/1120676103342788628"
+  },
+  {
+    "timestamp": "2026-10-30T12:38:10.000091+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @dialog1983 (Lin)\n\u2022 **User ID**: `1391222331824668783`\n\ud83d\udc49 https://discord.com/users/1391222331824668783"
+  },
+  {
+    "timestamp": "2026-10-30T12:38:26.604087+00:00",
+    "alert": "\ud83d\udcac **INBOUND DM FROM FAKE ADMIN!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Sender**: @dialog1983 (Lin)\n\u2022 **Content**: \"\"\n\ud83d\udc49 https://discord.com/users/1391222331824668783"
+  },
+  {
+    "timestamp": "2026-10-30T12:45:20.251042+00:00",
+    "alert": "\ud83d\udea8 **FAKE ADMIN INBOUND DETECTED!**\n\u2022 **Attributed Server**: `Unknown / Organic User`\n\u2022 **Role/Target**: `Inbound Friend Request`\n\u2022 **Fake Admin**: @zacckbbm (ZackBM)\n\u2022 **User ID**: `1348496930984169552`\n\ud83d\udc49 https://discord.com/users/1348496930984169552"
+  }
+]

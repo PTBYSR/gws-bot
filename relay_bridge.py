@@ -1,3 +1,4 @@
+import aiohttp
 """
 relay_bridge.py — Two-Way Discord Relay Hub (Channel DM Simulator).
 
@@ -271,50 +272,51 @@ _LAST_BUMP_TIMESTAMPS = {}
 
 async def bump_channel_to_top(channel: discord.TextChannel, bump_category: bool = True):
     """
-    Bumps the channel to the very top of its category (WhatsApp-style recent activity arrangement).
-    Also optionally moves the sender category to the top of all categories.
-    Includes a 15-second debounce per channel to protect against Discord API rate limits.
+    Ranks up both the channel to position 0 in its category, and the category
+    to position 0 at the top of the GWS Control server UI using Discord's bulk endpoint.
+    Includes a 10-second debounce per channel to protect against rate limits.
     """
     if not channel or not isinstance(channel, discord.TextChannel):
         return
 
     now = time.time()
     last_bump = _LAST_BUMP_TIMESTAMPS.get(channel.id, 0)
-    if now - last_bump < 15:
+    if now - last_bump < 10:
         return
 
     _LAST_BUMP_TIMESTAMPS[channel.id] = now
 
     try:
-        category = channel.category
-        if category:
-            cat_channels = [c for c in category.channels if isinstance(c, discord.TextChannel)]
-            cat_channels.sort(key=lambda c: c.position)
+        category_id = channel.category_id or (channel.category.id if channel.category else None)
+        hub_token = os.environ.get("DISCORD_TOKEN", "")
+        if not hub_token:
+            return
 
-            # Only call Discord API if not already at the top of the category
-            if cat_channels and cat_channels[0].id != channel.id:
-                top_pos = cat_channels[0].position
-                await channel.edit(position=top_pos)
-                print(f"  [↑] WhatsApp Flow: Bumped #{channel.name} to top of '{category.name}'")
-        else:
-            if channel.position > 0:
-                await channel.edit(position=0)
+        headers = {
+            "Authorization": hub_token,
+            "User-Agent": "Mozilla/5.0",
+            "Content-Type": "application/json"
+        }
+        
+        payload = []
+        if bump_category and category_id:
+            payload.append({"id": str(category_id), "position": 0})
+        payload.append({
+            "id": str(channel.id),
+            "position": 0,
+            **({"parent_id": str(category_id)} if category_id else {})
+        })
 
-        # Optionally float the sender category to the top of the server as well
-        if bump_category and category and channel.guild:
-            categories = sorted(channel.guild.categories, key=lambda c: c.position)
-            if categories and categories[0].id != category.id:
-                try:
-                    await category.edit(position=0)
-                except Exception:
-                    pass
-
-    except discord.Forbidden:
-        pass
-    except discord.HTTPException as e:
-        print(f"  [!] HTTP error while bumping #{channel.name}: {e}")
+        url = f"https://discord.com/api/v9/guilds/{HUB_SERVER_ID}/channels"
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.patch(url, json=payload) as resp:
+                if resp.status in (200, 204):
+                    print(f"  [↑] Ranked up #{channel.name} and category to TOP of UI!")
+                else:
+                    err_txt = await resp.text()
+                    print(f"  [!] Channel rank-up returned HTTP {resp.status}: {err_txt[:100]}")
     except Exception as e:
-        print(f"  [!] Failed to bump #{channel.name} to top: {e}")
+        print(f"  [!] Failed to rank up #{channel.name} to top: {e}")
 
 async def get_or_create_relay_channel(hub_client, sender_label: str, sender_token: str, target_user, origin_server_name: str = "Unknown"):
     """
@@ -361,9 +363,16 @@ async def get_or_create_relay_channel(hub_client, sender_label: str, sender_toke
         print(f"  [!] Cannot create relay channel: king_arthur0001 is missing 'Manage Channels' permission in GWS Control.")
         return None
 
-    # 3. Find or create Category for this sender
-    category_name = f"📁 {sender_label}"
+    # 3. Find or create Category for this sender ({server name} / {account listener})
+    if origin_server_name and origin_server_name != "Unknown":
+        category_name = f"📁 {origin_server_name} / {sender_label}"
+    else:
+        category_name = f"📁 {sender_label}"
+
     category = discord.utils.get(hub_guild.categories, name=category_name)
+    if not category and origin_server_name and origin_server_name != "Unknown":
+        # Fallback check for old style category if it exists
+        category = discord.utils.get(hub_guild.categories, name=f"📁 {sender_label}")
     if not category:
         try:
             category = await hub_guild.create_category(name=category_name)

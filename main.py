@@ -220,6 +220,23 @@ async def send_dm_alert(member, username_clean, is_recovery=False):
                     )
                 except Exception:
                     pass
+            elif str(member.guild.id) == "563389318773604382" or "horizon" in member.guild.name.lower():
+                dm_message = f"🌅🔔 **[HORIZON TRADING]** 📥 `{username_clean}` has joined!"
+                await target_user.send(dm_message)
+                print(f"  [🌅] HORIZON TRADING DM alert sent for `{username_clean}`")
+                try:
+                    from relay_bridge import trigger_buzz_burst
+                    asyncio.create_task(
+                        trigger_buzz_burst(
+                            client=client,
+                            target_user_id=LOG_TARGET_USER_ID,
+                            count=3,
+                            delay=0.5,
+                            auto_delete_after=15
+                        )
+                    )
+                except Exception as bz_err:
+                    print(f"  [!] Horizon buzz burst note: {bz_err}")
             else:
                 dm_message = f"📥 `{username_clean}` • {member.guild.name}"
                 await target_user.send(dm_message)
