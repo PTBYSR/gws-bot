@@ -69,12 +69,12 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr")
     },
     {
-        "account": "tradermir___",
+        "account": "horizon.trading.",
         "email": "claireguerita@gmail.com",
-        "assigned_server": "Trader Mir",
-        "guild_id": "764771990611427338",
-        "batch": "Batch 1",
-        "role": "Automated Account Listener",
+        "assigned_server": "Horizon Trading (Pending Join)",
+        "guild_id": "563389318773604382",
+        "batch": "Standby",
+        "role": "Rebranded for Horizon Trading",
         "default_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn")
     },
     {
