@@ -51,22 +51,31 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR1NXdmhJLlQycVJUR2dSRU14blQ4N0NvbTZEaFZGeUp4THBWQlpNeWlDXzBR")
     },
     {
-        "account": "coins.ph_hdawg.",
+        "account": "xaviermastertrader",
         "email": "rams.eytn.wdeborah1955@gmail.com",
-        "assigned_server": "Coins Community",
-        "guild_id": "974604371860021289",
-        "batch": "Batch 1",
+        "assigned_server": "Juicy Tradez",
+        "guild_id": "797916560714235946",
+        "batch": "Batch 2",
         "role": "Automated Account Listener",
-        "default_token": _dec("TVRJME9ESTBNelkwTURJMk1qZzFOamMyTlEuR2ZxUXZFLnRMelVMWkgwbHI1UzVqdEw5ZFcwbW5lZjRrcDRIVFV0azc2R1Zr")
+        "default_token": _dec("TVRJME9ESTBNelkwTURJMk1qZzFOamMyTlEuR0ZwUHZFLnZfLWNOZXBzMzZHNnFVVzJRNnlDZzM3ZVN4RzhLblNDbHJfNWcw")
     },
     {
         "account": "talon.1977._",
         "email": "pasetechnologies@gmail.com",
-        "assigned_server": "Underground Trading Company",
-        "guild_id": "958180490957975612",
+        "assigned_server": "UNASSIGNED (Freed)",
+        "guild_id": "",
+        "batch": "Standby",
+        "role": "Standby Account",
+        "default_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr")
+    },
+    {
+        "account": "tradermir___",
+        "email": "claireguerita@gmail.com",
+        "assigned_server": "Trader Mir",
+        "guild_id": "764771990611427338",
         "batch": "Batch 1",
         "role": "Automated Account Listener",
-        "default_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr")
+        "default_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn")
     },
     {
         "account": "themaster._5",
@@ -89,10 +98,10 @@ FLEET_INVENTORY = [
     {
         "account": "shiny.wind.up.bird",
         "email": "alvinmaduka@gmail.com",
-        "assigned_server": "Liquidity Theory",
+        "assigned_server": "Liquidity Theory (Disabled)",
         "guild_id": "1297957813644951613",
-        "batch": "Batch 2",
-        "role": "Automated Account Listener",
+        "batch": "Disabled",
+        "role": "Banned from server",
         "default_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv")
     },
     {
@@ -105,12 +114,12 @@ FLEET_INVENTORY = [
         "default_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0")
     },
     {
-        "account": "n.o.a.h.9_",
+        "account": "n.o.a.9_",
         "email": "meldridwilson@gmail.com",
-        "assigned_server": "Web-Based Wealth",
-        "guild_id": "1069351223217635428",
-        "batch": "Batch 2",
-        "role": "Automated Account Listener",
+        "assigned_server": "UNASSIGNED (Freed)",
+        "guild_id": "",
+        "batch": "Standby",
+        "role": "Standby Account",
         "default_token": _dec("TVRVMk16SXdOVEkyT1RJek1EUTFOamt4TXcuR0t3bDhhLjZ1ZGQ5Z2dBVFpkeFpuU3pBWFRRLUJYX2pfaFNoZ1I4b0FNcFZB")
     },
     {
