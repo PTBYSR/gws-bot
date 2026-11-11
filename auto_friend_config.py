@@ -58,8 +58,8 @@ BATCH_1_SERVERS = {
     },
     "563389318773604382": {
         "server_name": "Horizon Trading",
-        "sender_token": _dec("TVRVMk16RTVPRFF5TVRFek1UVTVOVGt4TncuR0Fmc2RYLllCclBxWlB6TXYyclBsdDJSQmd2ZWxuSGVKMWphVDdONTRsQ3N3"),
-        "sender_label": "horizon.trading",
+        "sender_token": _dec("TVRBeE1ERXdPRFl3TURRME16YzBNREl5TUEuR0lBaG9QLmRoQ1lzenFJbTlKeXBWOE5XazFIYTlBNlB4QXE0Y2RuWXJiU0hn"),
+        "sender_label": "horizon.trading.",
         "enabled": True,
         "delay_seconds": 6.0,
     },
