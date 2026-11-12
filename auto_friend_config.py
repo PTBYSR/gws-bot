@@ -37,6 +37,14 @@ def _dec(v: str) -> str:
 # ── Primary In-Code Multi-Server Fleet Configuration ──
 # ── Batch 1 Fleet Configuration ──
 BATCH_1_SERVERS = {
+    "820056640417038356": {
+        "server_name": "Due Diligence",
+        "sender_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr"),
+        "sender_label": "talon.1977._",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+
     "1433212223970345043": {
         "server_name": "DVLT Underground",
         "sender_token": _dec("TVRVMk16WTBORGt4T1RVeE1EUTNNRGMyTWcuR0prc3NmLlYzeHQzTkRTQlJYdlZ4SkF1NkJiVGZNUXFZdXBlOElIY0pPd3hN"),
@@ -62,6 +70,14 @@ BATCH_1_SERVERS = {
 
 # ── Batch 2 Fleet Configuration ──
 BATCH_2_SERVERS = {
+    "804369780429291590": {
+        "server_name": "DeepFuckingValue",
+        "sender_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv"),
+        "sender_label": "shiny.wind.up.bird",
+        "enabled": True,
+        "delay_seconds": 6.0,
+    },
+
     "1330889066425749576": {
         "server_name": "PASE",
         "sender_token": _dec("TVRVMk1UWTVNalV3TXpBM01qTXhNek0yTlEuRzNSZUltLm5rZUN0VkRqeHFRZTE1M2VfUGhoUklrd0VybjRXNHhQenQ1QVNV"),
@@ -89,14 +105,6 @@ BATCH_2_SERVERS = {
         "sender_label": "xaviermastertrader",
         "enabled": True,
         "delay_seconds": 6.0,
-    },
-    "1297957813644951613": {
-        "server_name": "Liquidity Theory",
-        "sender_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv"),
-        "sender_label": "shiny.wind.up.bird",
-        "enabled": False,
-        "delay_seconds": 6.0,
-        "_note": "DISABLED — shiny.wind.up.bird banned from server",
     },
     "1334980338467733596": {
         "server_name": "Verified Wealth",

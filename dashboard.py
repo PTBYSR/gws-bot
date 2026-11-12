@@ -62,10 +62,10 @@ FLEET_INVENTORY = [
     {
         "account": "talon.1977._",
         "email": "pasetechnologies@gmail.com",
-        "assigned_server": "UNASSIGNED (Freed)",
-        "guild_id": "",
-        "batch": "Standby",
-        "role": "Standby Account",
+        "assigned_server": "Due Diligence",
+        "guild_id": "820056640417038356",
+        "batch": "Batch 1",
+        "role": "Automated Account Listener",
         "default_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr")
     },
     {
@@ -98,10 +98,10 @@ FLEET_INVENTORY = [
     {
         "account": "shiny.wind.up.bird",
         "email": "alvinmaduka@gmail.com",
-        "assigned_server": "Liquidity Theory (Disabled)",
-        "guild_id": "1297957813644951613",
-        "batch": "Disabled",
-        "role": "Banned from server",
+        "assigned_server": "DeepFuckingValue",
+        "guild_id": "804369780429291590",
+        "batch": "Batch 2",
+        "role": "Automated Account Listener",
         "default_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv")
     },
     {
