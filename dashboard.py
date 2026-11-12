@@ -129,7 +129,7 @@ FLEET_INVENTORY = [
         "guild_id": "828801846277308426",
         "batch": "Batch 2",
         "role": "Automated Account Listener",
-        "default_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR0hOaWhrLk5RM1NGNzhpU2xQZGxxcFFDQnVqQW50MlZvY3JMRkxjQ1FEVmVr")
+        "default_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR1owX3o1LlEzTEVaSDNaNEd5NnhyV1RDRXBERVlPeTdTLVhOVjE3b3ZuOHpV")
     },
     {
         "account": "iam.vk7._",

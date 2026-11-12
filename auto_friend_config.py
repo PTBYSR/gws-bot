@@ -71,7 +71,7 @@ BATCH_2_SERVERS = {
     },
     "828801846277308426": {
         "server_name": "Mylol Trading Community",
-        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR2NDd2JMLlllZ0pKZFc3LVprSC1oZ0NsbWFrNkJ0bUd3TEtOY3BHUVRNMlZV"),
+        "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR1owX3o1LlEzTEVaSDNaNEd5NnhyV1RDRXBERVlPeTdTLVhOVjE3b3ZuOHpV"),
         "sender_label": "seanlala._",
         "enabled": True,
         "delay_seconds": 6.0,
