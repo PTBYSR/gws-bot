@@ -16,6 +16,7 @@
 | **`seanlala._`** | **Mylol Trading Community** | `828801846277308426` | `samuelbankz2144@gmail.com` | Batch 2 | 🟢 **ACTIVE** |
 | **`iam.vk7._`** | **Trading University** | `1122865043952898128` | `info@westcorevault.com` | Batch 2 | 🟢 **ACTIVE** |
 | **`nicliu___`** | **PASE** | `1330889066425749576` | `nicliu236@gmail.com` | Batch 2 | 🟢 **ACTIVE** |
+| **`ptbysr9767`** | **PennyQueen** | `808057094904217610` | `danielblossom78@gmail.com` | Batch 2 | 🟢 **ACTIVE** |
 
 ---
 

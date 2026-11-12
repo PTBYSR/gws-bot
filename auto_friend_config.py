@@ -26,8 +26,10 @@ def _dec(v: str) -> str:
     if not v:
         return ""
     try:
-        if v.startswith("TVR"):
-            return base64.b64decode(v.encode()).decode()
+        decoded = base64.b64decode(v.encode()).decode()
+        # Only return decoded if it looks like a valid Discord token
+        if "." in decoded and len(decoded) > 40:
+            return decoded
     except Exception:
         pass
     return v
@@ -115,6 +117,13 @@ BATCH_2_SERVERS = {
         "sender_token": _dec(""),
         "sender_label": "UNASSIGNED",
         "enabled": False,
+        "delay_seconds": 6.0,
+    },
+    "808057094904217610": {
+        "server_name": "PennyQueen",
+        "sender_token": _dec("TnpnNU16UTROemczTlRVek9ESTRPRGMxLkdWci1jUi5lamlnNEwzX3B0bEtYNklsN3p2U1lWZF9wS2VESEFZQVg0RTVUbw=="),
+        "sender_label": "ptbysr9767",
+        "enabled": True,
         "delay_seconds": 6.0,
     },
 }
