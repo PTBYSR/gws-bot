@@ -49,6 +49,9 @@ EXCLUDED_SERVERS = {
     "398075210949066764",   # Elite Crypto Signals
     "818847298083094649",   # Lottery Stocks
     "336549553891442689",   # HaiKhuu Trading
+    "1297957813644951613",  # Liquidity Theory (Permanently silenced)
+    "1122865043952898128",  # Trading University (Decommissioned)
+    "329712211989889026",   # Cryptex Commonwealth (Decommissioned)
 }
 
 # Create logs directory locally (ephemeral on Render free tier)
@@ -338,7 +341,7 @@ async def recover_missed_joins():
         gid = str(guild.id)
         if gid in EXCLUDED_SERVERS:
             continue
-        allowed_guilds = set(AUTO_FRIEND_SERVERS.keys()) | set(MANUAL_FAST_SERVERS)
+        allowed_guilds = set(k for k, v in AUTO_FRIEND_SERVERS.items() if v.get("enabled", True)) | set(MANUAL_FAST_SERVERS)
         if TARGET_SERVERS:
             allowed_guilds.update(TARGET_SERVERS)
         if gid not in allowed_guilds:
@@ -505,7 +508,7 @@ async def on_member_join(member):
         return
 
     # Strictly filter: only allow configured fleet servers or manual fast add servers
-    allowed_guilds = set(AUTO_FRIEND_SERVERS.keys()) | set(MANUAL_FAST_SERVERS)
+    allowed_guilds = set(k for k, v in AUTO_FRIEND_SERVERS.items() if v.get("enabled", True)) | set(MANUAL_FAST_SERVERS)
     if TARGET_SERVERS:
         allowed_guilds.update(TARGET_SERVERS)
 
