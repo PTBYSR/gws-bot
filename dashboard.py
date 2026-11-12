@@ -44,10 +44,10 @@ FLEET_INVENTORY = [
     {
         "account": "allen.warfield.",
         "email": "georgemorcos.live1@gmail.com",
-        "assigned_server": "Cryptex Commonwealth",
-        "guild_id": "329712211989889026",
-        "batch": "Batch 1",
-        "role": "Automated Account Listener",
+        "assigned_server": "UNASSIGNED (Freed)",
+        "guild_id": "",
+        "batch": "Standby",
+        "role": "Standby Account",
         "default_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR1NXdmhJLlQycVJUR2dSRU14blQ4N0NvbTZEaFZGeUp4THBWQlpNeWlDXzBR")
     },
     {
@@ -134,10 +134,10 @@ FLEET_INVENTORY = [
     {
         "account": "iam.vk7._",
         "email": "info@westcorevault.com",
-        "assigned_server": "Trading University",
-        "guild_id": "1122865043952898128",
-        "batch": "Batch 2",
-        "role": "Automated Account Listener",
+        "assigned_server": "UNASSIGNED (Freed)",
+        "guild_id": "",
+        "batch": "Standby",
+        "role": "Standby Account",
         "default_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR3llU2JnLm9BWi1TNWdxM0cxak8zdHA2bHI5by11U1JrMmo0UXlMVm9RZU1j")
     },
     {

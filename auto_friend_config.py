@@ -37,13 +37,6 @@ def _dec(v: str) -> str:
 # ── Primary In-Code Multi-Server Fleet Configuration ──
 # ── Batch 1 Fleet Configuration ──
 BATCH_1_SERVERS = {
-    "329712211989889026": {
-        "server_name": "Cryptex Commonwealth",
-        "sender_token": _dec("TVRVMk1USTNPRFl3T0RjNE1EQTBNak0zTXcuR1NXdmhJLlQycVJUR2dSRU14blQ4N0NvbTZEaFZGeUp4THBWQlpNeWlDXzBR"),
-        "sender_label": "allen.warfield.",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
     "1433212223970345043": {
         "server_name": "DVLT Underground",
         "sender_token": _dec("TVRVMk16WTBORGt4T1RVeE1EUTNNRGMyTWcuR0prc3NmLlYzeHQzTkRTQlJYdlZ4SkF1NkJiVGZNUXFZdXBlOElIY0pPd3hN"),
@@ -75,13 +68,6 @@ BATCH_2_SERVERS = {
         "sender_label": "nicliu___",
         "enabled": True,
         "delay_seconds": 6.0,
-    },
-    "1122865043952898128": {
-        "server_name": "Trading University",
-        "sender_token": _dec("TVRVMk1qa3pNekF3TWpZeU1UZ3lNRGszT1EuR3llU2JnLm9BWi1TNWdxM0cxak8zdHA2bHI5by11U1JrMmo0UXlMVm9RZU1j"),
-        "sender_label": "iam.vk7._",
-        "enabled": True,
-        "delay_seconds": 60.0,
     },
     "828801846277308426": {
         "server_name": "Mylol Trading Community",
