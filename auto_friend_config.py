@@ -106,13 +106,6 @@ BATCH_2_SERVERS = {
         "enabled": False,
         "delay_seconds": 6.0,
     },
-    "1049758236330430485": {
-        "server_name": "GoMining",
-        "sender_token": _dec("T1RJeU9ETTJOREExTkRrNE1ESXpPVGsyLkdFb1BxWi5jdkh2REJDOUMyX2ViNnltek04Z3pCMU82RGozVUFlZmVFRGN2cw=="),
-        "sender_label": "kunal00._",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
     "808057094904217610": {
         "server_name": "PennyQueen",
         "sender_token": _dec("TnpnNU16UTROemczTlRVek9ESTRPRGMxLkdWci1jUi5lamlnNEwzX3B0bEtYNklsN3p2U1lWZF9wS2VESEFZQVg0RTVUbw=="),
