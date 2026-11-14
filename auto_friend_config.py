@@ -108,8 +108,8 @@ BATCH_2_SERVERS = {
     },
     "1049758236330430485": {
         "server_name": "GoMining",
-        "sender_token": _dec("TlRZeU9USXdOakk0TXpZeU1UUTVPRGt5LkdpdU1BMC5QRG1rR0NFVnloTXFMd296RzJrb2l1dklJTWV5Qy1UdzQ5NVV5OA=="),
-        "sender_label": ".gmtrades_",
+        "sender_token": _dec("T1RJeU9ETTJOREExTkRrNE1ESXpPVGsyLkdFb1BxWi5jdkh2REJDOUMyX2ViNnltek04Z3pCMU82RGozVUFlZmVFRGN2cw=="),
+        "sender_label": "kunal00._",
         "enabled": True,
         "delay_seconds": 6.0,
     },
