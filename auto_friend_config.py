@@ -42,7 +42,7 @@ BATCH_1_SERVERS = {
         "sender_token": _dec("TVRNeU16UXlOakF3TWpFd05USTNNRFF3TXcuR2lRR1JXLm9WTU8wamhqSVF4MmFOOXhwMUFMY1JTV29vLXo1RXN2RURCVVpr"),
         "sender_label": "talon.1977._",
         "enabled": True,
-        "delay_seconds": 6.0,
+        "delay_seconds": 35.0,
     },
 
     "1433212223970345043": {
@@ -89,13 +89,6 @@ BATCH_2_SERVERS = {
         "server_name": "Mylol Trading Community",
         "sender_token": _dec("TVRVMk16WTNNelkwTURneE1qSTRNakEwT0EuR1owX3o1LlEzTEVaSDNaNEd5NnhyV1RDRXBERVlPeTdTLVhOVjE3b3ZuOHpV"),
         "sender_label": "seanlala._",
-        "enabled": True,
-        "delay_seconds": 6.0,
-    },
-    "1306399620217438309": {
-        "server_name": "PAYTIENCE",
-        "sender_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0"),
-        "sender_label": "cooliam___",
         "enabled": True,
         "delay_seconds": 6.0,
     },

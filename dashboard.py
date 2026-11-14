@@ -107,10 +107,10 @@ FLEET_INVENTORY = [
     {
         "account": "cooliam___",
         "email": "info@murdochvault.com",
-        "assigned_server": "PAYTIENCE",
-        "guild_id": "1306399620217438309",
-        "batch": "Batch 2",
-        "role": "Automated Account Listener",
+        "assigned_server": "UNASSIGNED (Freed)",
+        "guild_id": "",
+        "batch": "Standby",
+        "role": "Standby Account",
         "default_token": _dec("TVRVMk1qa3lPVEExTkRVeE9UTTVORFF3TncuR1lMTllBLjdOR3UwOE00dFZ0SE14OG1jQUZ1eElmSlRXQjQxZ2JuNkl1QXI0")
     },
     {

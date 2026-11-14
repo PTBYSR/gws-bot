@@ -52,6 +52,7 @@ EXCLUDED_SERVERS = {
     "1297957813644951613",  # Liquidity Theory (Permanently silenced)
     "1122865043952898128",  # Trading University (Decommissioned)
     "329712211989889026",   # Cryptex Commonwealth (Decommissioned)
+    "1306399620217438309",  # PAYTIENCE (Decommissioned — permanent captcha gate)
 }
 
 # Create logs directory locally (ephemeral on Render free tier)
