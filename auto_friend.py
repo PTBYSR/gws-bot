@@ -387,7 +387,15 @@ async def run_welcome_drip_sequence(
                     pass
             break
         except Exception as se:
+            err_str = str(se).lower()
             print(f"  [!] Error sending welcome step {step_num}: {se}")
+            if "captcha" in err_str:
+                if relay_channel:
+                    try:
+                        await relay_channel.send(f"⚠️ **Auto-Welcome Failed**: Discord required hCaptcha on `{sender_label}`. Drip aborted.")
+                    except Exception:
+                        pass
+                return
 
         # 4. Wait configured delay before next step
         if delay_after_sec > 0 and idx < len(sequence):
