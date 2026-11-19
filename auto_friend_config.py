@@ -75,7 +75,7 @@ BATCH_2_SERVERS = {
         "sender_token": _dec("TVRVMk1qa3dPRGt4TmpZd09EWTJNelU1TlEuRzlfcEEwLnA1dEpDYl9zMTNxZVBuVG4zY2VNSlhJRGt0VmZkM0pEbmVuWFpv"),
         "sender_label": "shiny.wind.up.bird",
         "enabled": True,
-        "delay_seconds": 6.0,
+        "delay_seconds": 45.0,
     },
 
     "1330889066425749576": {
