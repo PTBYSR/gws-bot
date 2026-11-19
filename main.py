@@ -561,7 +561,11 @@ async def on_member_join(member):
 @client.event
 async def on_message(message):
     """Option A: Live event detection test trigger and Relay Outbound Bridge."""
-    if message.author.id == client.user.id:
+    content_clean = message.content.strip().lower()
+    is_test_cmd = content_clean in ["!test", "!ping", "test", "ping"] or content_clean.startswith("!testfriend")
+
+    # Allow operator or self (for !ping/!test verification), block all other self messages
+    if message.author.id == client.user.id and not is_test_cmd:
         return
 
     # Two-Way Channel DM Simulator (Relay Outbound to Prospect)
@@ -573,10 +577,9 @@ async def on_message(message):
     except Exception as e:
         print(f"  [!] Relay outbound error: {e}")
 
-    if LOG_TARGET_USER_ID and str(message.author.id) != str(LOG_TARGET_USER_ID):
+    if not is_test_cmd and LOG_TARGET_USER_ID and str(message.author.id) != str(LOG_TARGET_USER_ID):
         return
 
-    content_clean = message.content.strip().lower()
     if content_clean in ["!test", "!ping", "test", "ping"]:
         latency_ms = round(client.latency * 1000)
         servers_count = len(client.guilds)
